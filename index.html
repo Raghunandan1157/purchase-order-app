@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Purchase Order - Navachetana Microfin Services</title>
+  <title>Purchase Order - Navachetana Livelihoods</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -28,12 +28,12 @@
       <!-- Company Info + Date -->
       <div class="header-row">
         <div class="company-block">
-          <p class="co-name">Navachetana Microfin Services Pvt Ltd</p>
+          <p class="co-name">Navachetana Livelihoods Private Limited</p>
           <p>Navachetana Heights</p>
           <p>Ashwini Nagar 1st Cross</p>
           <p>Haveri-581110. KARNATAKA</p>
           <p>Mob: 8105801229</p>
-          <p>GSTIN:29AADCN0530G1ZR</p>
+          <p>GSTIN:29AAICN8493K1ZJ</p>
           <p>CIN:U65922KA1995PTCO17982</p>
           <p>admin-ast2@navachetanagroup.com</p>
         </div>
@@ -51,13 +51,15 @@
         <input type="text" id="supplierGstin" class="inline-input" placeholder="GSTIN: Enter GSTIN" />
       </div>
 
-      <!-- Items Table -->
+      <!-- Items Table with per-item GST -->
       <table class="po-table" id="poTable">
         <thead>
           <tr>
-            <th class="col-desc"></th>
+            <th class="col-desc">Description</th>
             <th class="col-qty">QTY</th>
             <th class="col-price">UNIT PRICE</th>
+            <th class="col-gst">GST %</th>
+            <th class="col-gst-amt">GST AMT</th>
             <th class="col-total">TOTAL</th>
             <th class="col-action no-print"></th>
           </tr>
@@ -67,14 +69,16 @@
 
       <button id="btnAddRow" class="btn-add-row no-print">+ Add Item</button>
 
-      <!-- Empty rows for print (inserted by JS) -->
-
-      <!-- GST + Grand Total -->
+      <!-- Totals -->
       <table class="totals-table">
         <tbody>
-          <tr class="gst-row">
-            <td class="totals-left-cell">Add GST @ <input type="number" id="gstRate" value="18" min="0" max="100" class="gst-input" /><span class="print-gst-val">18</span>%</td>
-            <td class="totals-right-cell" id="gstAmount">0.00</td>
+          <tr>
+            <td class="totals-left-cell">Subtotal (before GST)</td>
+            <td class="totals-right-cell" id="subtotal">0.00</td>
+          </tr>
+          <tr>
+            <td class="totals-left-cell">Total GST</td>
+            <td class="totals-right-cell" id="totalGst">0.00</td>
           </tr>
           <tr class="grand-row">
             <td class="totals-left-cell grand-label">Grand TOTAL</td>
@@ -97,7 +101,7 @@
           <textarea id="remarks" rows="2" class="inline-textarea remarks-area" placeholder="Enter remarks..."></textarea>
         </div>
         <div class="sign-side">
-          <p>For Navachetana Microfin services Pvt Ltd</p>
+          <p>For Navachetana Livelihoods Private Limited</p>
           <div class="sig-space"></div>
           <p class="sig-title">Authorised Signatory</p>
         </div>

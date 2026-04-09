@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-  max-width: 850px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -45,7 +45,6 @@ body {
   border: 1px solid #ccc;
 }
 
-/* Red bars */
 .red-bar-top {
   background: #c0392b;
   padding: 12px 30px;
@@ -93,7 +92,7 @@ body {
   color: #c0392b;
 }
 
-/* ===== SUPPLIER (inline editable) ===== */
+/* ===== SUPPLIER ===== */
 .supplier-block {
   padding: 14px 30px 16px;
   border-top: 1px solid #eee;
@@ -105,7 +104,6 @@ body {
   margin-bottom: 6px;
 }
 
-/* Inline inputs (look like text, editable) */
 .inline-input,
 .inline-textarea {
   display: block;
@@ -147,32 +145,36 @@ body {
 }
 .po-table th {
   color: #fff;
-  padding: 8px 12px;
-  font-size: 12px;
+  padding: 8px 10px;
+  font-size: 11px;
   font-weight: 600;
   text-align: center;
   border: 1px solid #a93226;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 .po-table th.col-desc {
   text-align: left;
-  border-left: 1px solid #c0392b;
 }
 .po-table th.col-action {
   background: transparent;
   border: none;
-  width: 40px;
+  width: 36px;
 }
+
 .col-desc { width: auto; }
-.col-qty { width: 70px; }
-.col-price { width: 110px; }
-.col-total { width: 120px; }
-.col-action { width: 40px; }
+.col-qty { width: 60px; }
+.col-price { width: 100px; }
+.col-gst { width: 70px; }
+.col-gst-amt { width: 95px; }
+.col-total { width: 110px; }
+.col-action { width: 36px; }
 
 .po-table td {
-  padding: 6px 10px;
+  padding: 5px 8px;
   border: 1px solid #ddd;
   font-size: 13px;
-  height: 34px;
+  height: 32px;
 }
 .po-table td.action-cell {
   border: none;
@@ -194,14 +196,36 @@ body {
   text-align: right;
 }
 .po-table td.qty-cell input { text-align: center; }
-.row-total-cell {
-  text-align: right !important;
+
+/* GST select dropdown */
+.po-table td select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 2px 0;
+  outline: none;
+  cursor: pointer;
+  text-align: center;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.po-table td select:focus {
+  background: #fffef5;
+}
+.po-table td.gst-select-cell {
+  text-align: center;
+  position: relative;
+}
+.po-table td.gst-amt-cell,
+.po-table td.row-total-cell {
+  text-align: right;
   font-weight: 500;
 }
 
-/* Empty rows */
 .empty-row td {
-  height: 34px;
+  height: 32px;
   border: 1px solid #ddd;
 }
 
@@ -243,37 +267,18 @@ body {
   border-collapse: collapse;
 }
 .totals-table td {
-  padding: 10px 12px;
+  padding: 8px 10px;
   font-size: 13px;
   border: 1px solid #ddd;
 }
-.totals-left-cell {
-  text-align: left;
-}
+.totals-left-cell { text-align: left; }
 .totals-right-cell {
   text-align: right;
-  width: 120px;
+  width: 110px;
   font-weight: 500;
 }
-.grand-label {
-  font-weight: 700 !important;
-}
-.grand-value {
-  font-weight: 700 !important;
-}
-
-.gst-input {
-  width: 40px;
-  padding: 1px 4px;
-  border: 1px solid #ddd;
-  border-radius: 3px;
-  font-size: 13px;
-  text-align: center;
-  font-family: inherit;
-  outline: none;
-}
-.gst-input:focus { border-color: #c0392b; }
-.print-gst-val { display: none; }
+.grand-label { font-weight: 700 !important; }
+.grand-value { font-weight: 700 !important; }
 
 /* ===== WORDS ===== */
 .words-block {
@@ -312,7 +317,7 @@ body {
 }
 .sign-side {
   text-align: center;
-  min-width: 240px;
+  min-width: 260px;
 }
 .sign-side p {
   font-size: 13px;
@@ -398,7 +403,7 @@ body {
 }
 
 /* ========================================
-   PRINT STYLES — match original PDF
+   PRINT STYLES
    ======================================== */
 @media print {
   * {
@@ -408,48 +413,40 @@ body {
   body { background: #fff; margin: 0; padding: 0; }
   .container { padding: 0; max-width: 100%; }
   .no-print { display: none !important; }
-
   .po-page { border: none; }
 
-  /* Red bars */
   .red-bar-top { background: #c0392b !important; }
   .red-bar-top h1 { color: #fff !important; }
   .red-bar-bottom { background: #c0392b !important; }
 
-  /* Date */
   .dl { color: #c0392b !important; }
   .date-line span:not(.dl) { color: #c0392b !important; }
 
-  /* Table */
   .po-table thead tr { background: #c0392b !important; }
   .po-table th { color: #fff !important; background: #c0392b !important; }
   .po-table th.col-action { display: none !important; }
   .po-table td.action-cell { display: none !important; }
 
-  /* Inline inputs become plain text */
   .inline-input,
   .inline-textarea,
   .po-table td input,
+  .po-table td select,
   .remarks-area {
     border: none !important;
     border-bottom: none !important;
     background: transparent !important;
     padding: 3px 0 !important;
     box-shadow: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
   }
 
-  /* GST: hide input, show plain text */
-  .gst-input { display: none !important; }
-  .print-gst-val { display: inline !important; }
-
-  /* Page */
   @page {
     margin: 10mm;
     size: A4;
   }
 }
 
-/* ===== RESPONSIVE ===== */
 @media (max-width: 640px) {
   .header-row { flex-direction: column; }
   .date-block { text-align: left; margin-top: 10px; }

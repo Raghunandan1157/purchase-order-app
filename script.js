@@ -61,7 +61,6 @@ function numberToWords(num) {
   }
 
   result = result.trim();
-  // Capitalize first letter
   result = result.charAt(0).toUpperCase() + result.slice(1);
 
   result += ' rupees';
@@ -72,13 +71,12 @@ function numberToWords(num) {
   return result;
 }
 
-// === Format number in Indian comma system ===
+// === Indian number format ===
 function formatINR(num) {
   const parts = num.toFixed(2).split('.');
   let intPart = parts[0];
   const decPart = parts[1];
 
-  // Indian grouping: last 3 digits, then groups of 2
   let result = '';
   const len = intPart.length;
   if (len <= 3) {
@@ -95,8 +93,8 @@ function formatINR(num) {
   return result + '.' + decPart;
 }
 
-// === Item Rows ===
-function addItemRow(desc = '', qty = '', price = '') {
+// === Item Rows (with per-item GST) ===
+function addItemRow(desc = '', qty = '', price = '', gst = '18') {
   const tbody = document.getElementById('itemsBody');
   const tr = document.createElement('tr');
   tr.className = 'item-row';
@@ -104,12 +102,23 @@ function addItemRow(desc = '', qty = '', price = '') {
     <td class="desc-cell"><input type="text" class="item-desc" value="${desc}" placeholder="Item description" /></td>
     <td class="qty-cell"><input type="number" class="item-qty" value="${qty}" min="0" placeholder="0" /></td>
     <td class="price-cell"><input type="number" class="item-price" value="${price}" min="0" step="0.01" placeholder="0.00" /></td>
+    <td class="gst-select-cell">
+      <select class="item-gst">
+        <option value="0" ${gst === '0' ? 'selected' : ''}>0%</option>
+        <option value="5" ${gst === '5' ? 'selected' : ''}>5%</option>
+        <option value="12" ${gst === '12' ? 'selected' : ''}>12%</option>
+        <option value="18" ${gst === '18' || !gst ? 'selected' : ''}>18%</option>
+        <option value="28" ${gst === '28' ? 'selected' : ''}>28%</option>
+      </select>
+    </td>
+    <td class="gst-amt-cell">0.00</td>
     <td class="row-total-cell">0.00</td>
     <td class="action-cell no-print"><button class="btn-remove" onclick="removeRow(this)">&times;</button></td>
   `;
   tbody.appendChild(tr);
   tr.querySelector('.item-qty').addEventListener('input', recalculate);
   tr.querySelector('.item-price').addEventListener('input', recalculate);
+  tr.querySelector('.item-gst').addEventListener('change', recalculate);
   recalculate();
 }
 
@@ -120,39 +129,44 @@ function removeRow(btn) {
 
 function recalculate() {
   let subtotal = 0;
+  let totalGst = 0;
+
   document.querySelectorAll('#itemsBody .item-row').forEach(row => {
     const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
     const price = parseFloat(row.querySelector('.item-price').value) || 0;
-    const total = qty * price;
-    row.querySelector('.row-total-cell').textContent = formatINR(total);
-    subtotal += total;
+    const gstPercent = parseFloat(row.querySelector('.item-gst').value) || 0;
+
+    const lineTotal = qty * price;
+    const lineGst = lineTotal * gstPercent / 100;
+    const lineGrand = lineTotal + lineGst;
+
+    row.querySelector('.gst-amt-cell').textContent = formatINR(lineGst);
+    row.querySelector('.row-total-cell').textContent = formatINR(lineGrand);
+
+    subtotal += lineTotal;
+    totalGst += lineGst;
   });
 
-  const gstRate = parseFloat(document.getElementById('gstRate').value) || 0;
-  const gstAmount = subtotal * gstRate / 100;
-  const grandTotal = subtotal + gstAmount;
+  const grandTotal = subtotal + totalGst;
 
-  document.getElementById('gstAmount').textContent = formatINR(gstAmount);
+  document.getElementById('subtotal').textContent = formatINR(subtotal);
+  document.getElementById('totalGst').textContent = formatINR(totalGst);
   document.getElementById('grandTotal').textContent = formatINR(grandTotal);
   document.getElementById('amountWords').textContent = numberToWords(grandTotal);
-  document.querySelector('.print-gst-val').textContent = gstRate;
 }
 
-// === Print: add empty rows to fill space like original PDF ===
+// === Print: add empty rows ===
 function prepareForPrint() {
-  // Remove old empty rows
   document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
 
-  // Add empty rows to match PDF look (fill space between items and totals)
   const itemCount = document.querySelectorAll('#itemsBody .item-row').length;
-  const minRows = 8;
-  const emptyNeeded = Math.max(minRows - itemCount, 3);
+  const emptyNeeded = Math.max(8 - itemCount, 3);
 
   const tbody = document.getElementById('itemsBody');
   for (let i = 0; i < emptyNeeded; i++) {
     const tr = document.createElement('tr');
     tr.className = 'empty-row';
-    tr.innerHTML = '<td></td><td></td><td></td><td></td>';
+    tr.innerHTML = '<td></td><td></td><td></td><td></td><td></td><td></td>';
     tbody.appendChild(tr);
   }
 }
@@ -169,6 +183,7 @@ function getFormData() {
       desc: row.querySelector('.item-desc').value,
       qty: row.querySelector('.item-qty').value,
       price: row.querySelector('.item-price').value,
+      gst: row.querySelector('.item-gst').value,
     });
   });
 
@@ -178,7 +193,6 @@ function getFormData() {
     supplierName: document.getElementById('supplierName').value,
     supplierAddress: document.getElementById('supplierAddress').value,
     supplierGstin: document.getElementById('supplierGstin').value,
-    gstRate: document.getElementById('gstRate').value,
     remarks: document.getElementById('remarks').value,
     items,
     savedAt: new Date().toISOString(),
@@ -191,12 +205,11 @@ function loadFormData(data) {
   document.getElementById('supplierName').value = data.supplierName || '';
   document.getElementById('supplierAddress').value = data.supplierAddress || '';
   document.getElementById('supplierGstin').value = data.supplierGstin || '';
-  document.getElementById('gstRate').value = data.gstRate || '18';
   document.getElementById('remarks').value = data.remarks || '';
 
   document.getElementById('itemsBody').innerHTML = '';
   if (data.items && data.items.length > 0) {
-    data.items.forEach(item => addItemRow(item.desc, item.qty, item.price));
+    data.items.forEach(item => addItemRow(item.desc, item.qty, item.price, item.gst || '18'));
   } else {
     addItemRow();
   }
@@ -267,7 +280,6 @@ function newPO() {
   document.getElementById('supplierAddress').value = '';
   document.getElementById('supplierGstin').value = '';
   document.getElementById('remarks').value = '';
-  document.getElementById('gstRate').value = '18';
   document.getElementById('itemsBody').innerHTML = '';
   setAutoFields();
   addItemRow();
@@ -299,7 +311,6 @@ document.getElementById('btnAddRow').addEventListener('click', () => addItemRow(
 document.getElementById('btnCloseModal').addEventListener('click', () => {
   document.getElementById('savedModal').classList.add('hidden');
 });
-document.getElementById('gstRate').addEventListener('input', recalculate);
 document.getElementById('savedModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('savedModal')) {
     document.getElementById('savedModal').classList.add('hidden');
