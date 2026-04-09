@@ -157,7 +157,7 @@ function prepareForPrint() {
   document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
 
   const itemCount = document.querySelectorAll('#itemsBody .item-row').length;
-  const emptyNeeded = Math.max(8 - itemCount, 3);
+  const emptyNeeded = Math.max(4 - itemCount, 0);
 
   const tbody = document.getElementById('itemsBody');
   for (let i = 0; i < emptyNeeded; i++) {
