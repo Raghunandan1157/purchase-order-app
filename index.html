@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Purchase Order - Navachetana Microfin Services</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <div class="toolbar">
+      <button id="btnNew" title="New PO">+ New</button>
+      <button id="btnSave" title="Save to Local Storage">Save</button>
+      <button id="btnPrint" title="Print Purchase Order">Print</button>
+      <button id="btnLoad" title="Load Saved POs">Load Saved</button>
+      <button id="btnClear" title="Clear All Saved">Clear All</button>
+    </div>
+
+    <div class="purchase-order" id="purchaseOrder">
+      <!-- Header -->
+      <div class="po-header">
+        <h1>Purchase Order</h1>
+      </div>
+
+      <!-- Company & Date Row -->
+      <div class="company-date-row">
+        <div class="company-info">
+          <p class="company-name">Navachetana Microfin Services Pvt Ltd</p>
+          <p class="company-detail">Navachetana Heights</p>
+          <p class="company-detail">Ashwini Nagar 1st Cross</p>
+          <p class="company-detail">Haveri-581110. KARNATAKA</p>
+          <p class="company-detail">Mob: 8105801229</p>
+          <p class="company-detail">GSTIN: 29AADCN0530G1ZR</p>
+          <p class="company-detail">CIN: U65922KA1995PTCO17982</p>
+          <p class="company-detail">admin-ast2@navachetanagroup.com</p>
+        </div>
+        <div class="date-section">
+          <div class="field-group">
+            <label>Date</label>
+            <input type="text" id="poDate" readonly />
+          </div>
+          <div class="field-group">
+            <label>PO Number</label>
+            <input type="text" id="poNumber" readonly />
+          </div>
+        </div>
+      </div>
+
+      <!-- Supplier Section -->
+      <div class="supplier-section">
+        <div class="section-label">SUPPLIER:</div>
+        <div class="field-group">
+          <label>Supplier Name</label>
+          <input type="text" id="supplierName" placeholder="Enter supplier name" />
+        </div>
+        <div class="field-group">
+          <label>Supplier Address</label>
+          <textarea id="supplierAddress" rows="3" placeholder="Enter supplier address"></textarea>
+        </div>
+        <div class="field-group">
+          <label>Supplier GSTIN</label>
+          <input type="text" id="supplierGstin" placeholder="Enter GSTIN" />
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="items-section">
+        <table id="itemsTable">
+          <thead>
+            <tr>
+              <th class="col-sno">#</th>
+              <th class="col-desc">Description</th>
+              <th class="col-qty">QTY</th>
+              <th class="col-price">UNIT PRICE</th>
+              <th class="col-total">TOTAL</th>
+              <th class="col-action no-print">Action</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody">
+          </tbody>
+        </table>
+        <button id="btnAddRow" class="btn-add-row no-print">+ Add Item</button>
+      </div>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="totals-row">
+          <span class="totals-label">Subtotal</span>
+          <span class="totals-value" id="subtotal">0.00</span>
+        </div>
+        <div class="totals-row gst-row">
+          <span class="totals-label">
+            GST @
+            <input type="number" id="gstRate" value="18" min="0" max="100" class="gst-input" />%
+          </span>
+          <span class="totals-value" id="gstAmount">0.00</span>
+        </div>
+        <div class="totals-row grand-total-row">
+          <span class="totals-label">Grand TOTAL</span>
+          <span class="totals-value" id="grandTotal">0.00</span>
+        </div>
+      </div>
+
+      <!-- Amount in Words -->
+      <div class="words-section">
+        <div class="field-group">
+          <label>Amount in Words</label>
+          <input type="text" id="amountWords" readonly />
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer-section">
+        <div class="remarks">
+          <div class="field-group">
+            <label>Remarks / Payment Instructions</label>
+            <textarea id="remarks" rows="2" placeholder="Enter remarks..."></textarea>
+          </div>
+        </div>
+        <div class="signatory">
+          <p>For Navachetana Microfin Services Pvt Ltd</p>
+          <div class="sig-line"></div>
+          <p>Authorised Signatory</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Saved POs Modal -->
+    <div id="savedModal" class="modal hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Saved Purchase Orders</h2>
+          <button id="btnCloseModal" class="btn-close">&times;</button>
+        </div>
+        <div id="savedList" class="saved-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
