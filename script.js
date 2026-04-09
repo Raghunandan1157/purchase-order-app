@@ -1,6 +1,3 @@
-// === Constants ===
-const EMPTY_PRINT_ROWS = 7; // empty rows in table to match PDF layout
-
 // === Auto Date & PO Number ===
 function formatDate(date) {
   const d = String(date.getDate()).padStart(2, '0');
@@ -36,7 +33,7 @@ function numberToWords(num) {
 
   function threeDigits(n) {
     if (n >= 100) {
-      return ones[Math.floor(n / 100)] + ' Hundred' + (n % 100 ? ' ' + twoDigits(n % 100) : '');
+      return ones[Math.floor(n / 100)] + ' hundred' + (n % 100 ? ' ' + twoDigits(n % 100) : '');
     }
     return twoDigits(n);
   }
@@ -48,15 +45,15 @@ function numberToWords(num) {
   let rem = rupees;
 
   if (rem >= 10000000) {
-    result += threeDigits(Math.floor(rem / 10000000)) + ' Crore ';
+    result += threeDigits(Math.floor(rem / 10000000)) + ' crore ';
     rem = rem % 10000000;
   }
   if (rem >= 100000) {
-    result += twoDigits(Math.floor(rem / 100000)) + ' Lakh ';
+    result += twoDigits(Math.floor(rem / 100000)) + ' lakh ';
     rem = rem % 100000;
   }
   if (rem >= 1000) {
-    result += twoDigits(Math.floor(rem / 1000)) + ' Thousand ';
+    result += twoDigits(Math.floor(rem / 1000)) + ' thousand ';
     rem = rem % 1000;
   }
   if (rem > 0) {
@@ -64,38 +61,43 @@ function numberToWords(num) {
   }
 
   result = result.trim();
+  // Capitalize first letter
+  result = result.charAt(0).toUpperCase() + result.slice(1);
 
-  // Lowercase first letter of each word except first
-  let words = result.charAt(0).toUpperCase() + result.slice(1).toLowerCase();
-
-  words += ' rupees';
+  result += ' rupees';
   if (paise > 0) {
-    words += ' and ' + twoDigits(paise).toLowerCase() + ' paise';
+    result += ' and ' + twoDigits(paise).toLowerCase() + ' paise';
   }
-  words += ' only';
-  return words;
+  result += ' only';
+  return result;
 }
 
-// === Sync supplier fields to print display ===
-function syncSupplierToDisplay() {
-  const name = document.getElementById('supplierName').value;
-  const addr = document.getElementById('supplierAddress').value;
-  const gstin = document.getElementById('supplierGstin').value;
+// === Format number in Indian comma system ===
+function formatINR(num) {
+  const parts = num.toFixed(2).split('.');
+  let intPart = parts[0];
+  const decPart = parts[1];
 
-  document.getElementById('printSupplierName').textContent = name;
-  document.getElementById('printSupplierAddr').textContent = addr;
-  document.getElementById('printSupplierGstin').textContent = gstin ? 'GSTIN: ' + gstin : '';
-}
-
-function syncRemarksToDisplay() {
-  document.getElementById('printRemarks').textContent = document.getElementById('remarks').value;
+  // Indian grouping: last 3 digits, then groups of 2
+  let result = '';
+  const len = intPart.length;
+  if (len <= 3) {
+    result = intPart;
+  } else {
+    result = intPart.substring(len - 3);
+    intPart = intPart.substring(0, len - 3);
+    while (intPart.length > 2) {
+      result = intPart.substring(intPart.length - 2) + ',' + result;
+      intPart = intPart.substring(0, intPart.length - 2);
+    }
+    result = intPart + ',' + result;
+  }
+  return result + '.' + decPart;
 }
 
 // === Item Rows ===
-let rowCount = 0;
-
-function createRow(desc, qty, price) {
-  rowCount++;
+function addItemRow(desc = '', qty = '', price = '') {
+  const tbody = document.getElementById('itemsBody');
   const tr = document.createElement('tr');
   tr.className = 'item-row';
   tr.innerHTML = `
@@ -103,14 +105,8 @@ function createRow(desc, qty, price) {
     <td class="qty-cell"><input type="number" class="item-qty" value="${qty}" min="0" placeholder="0" /></td>
     <td class="price-cell"><input type="number" class="item-price" value="${price}" min="0" step="0.01" placeholder="0.00" /></td>
     <td class="row-total-cell">0.00</td>
-    <td class="action-cell no-print" style="text-align:center"><button class="btn-remove" onclick="removeRow(this)">&times;</button></td>
+    <td class="action-cell no-print"><button class="btn-remove" onclick="removeRow(this)">&times;</button></td>
   `;
-  return tr;
-}
-
-function addItemRow(desc = '', qty = '', price = '') {
-  const tbody = document.getElementById('itemsBody');
-  const tr = createRow(desc, qty, price);
   tbody.appendChild(tr);
   tr.querySelector('.item-qty').addEventListener('input', recalculate);
   tr.querySelector('.item-price').addEventListener('input', recalculate);
@@ -119,7 +115,6 @@ function addItemRow(desc = '', qty = '', price = '') {
 
 function removeRow(btn) {
   btn.closest('tr').remove();
-  rowCount = document.querySelectorAll('#itemsBody .item-row').length;
   recalculate();
 }
 
@@ -129,7 +124,7 @@ function recalculate() {
     const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
     const price = parseFloat(row.querySelector('.item-price').value) || 0;
     const total = qty * price;
-    row.querySelector('.row-total-cell').textContent = formatNumber(total);
+    row.querySelector('.row-total-cell').textContent = formatINR(total);
     subtotal += total;
   });
 
@@ -137,41 +132,27 @@ function recalculate() {
   const gstAmount = subtotal * gstRate / 100;
   const grandTotal = subtotal + gstAmount;
 
-  document.getElementById('gstAmount').textContent = formatNumber(gstAmount);
-  document.getElementById('grandTotal').textContent = formatNumber(grandTotal);
+  document.getElementById('gstAmount').textContent = formatINR(gstAmount);
+  document.getElementById('grandTotal').textContent = formatINR(grandTotal);
   document.getElementById('amountWords').textContent = numberToWords(grandTotal);
-
-  // Update the print-only GST rate text
-  document.querySelector('.print-only-gst').textContent = gstRate;
+  document.querySelector('.print-gst-val').textContent = gstRate;
 }
 
-function formatNumber(num) {
-  return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-// === Print: add empty rows to match PDF layout ===
+// === Print: add empty rows to fill space like original PDF ===
 function prepareForPrint() {
-  syncSupplierToDisplay();
-  syncRemarksToDisplay();
-
   // Remove old empty rows
   document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
 
-  // Count actual item rows
-  const itemRows = document.querySelectorAll('#itemsBody .item-row').length;
-  const totalRowsNeeded = Math.max(itemRows + EMPTY_PRINT_ROWS, 8);
-  const emptyNeeded = totalRowsNeeded - itemRows;
+  // Add empty rows to match PDF look (fill space between items and totals)
+  const itemCount = document.querySelectorAll('#itemsBody .item-row').length;
+  const minRows = 8;
+  const emptyNeeded = Math.max(minRows - itemCount, 3);
 
   const tbody = document.getElementById('itemsBody');
   for (let i = 0; i < emptyNeeded; i++) {
     const tr = document.createElement('tr');
     tr.className = 'empty-row';
-    tr.innerHTML = `
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-    `;
+    tr.innerHTML = '<td></td><td></td><td></td><td></td>';
     tbody.appendChild(tr);
   }
 }
@@ -214,15 +195,11 @@ function loadFormData(data) {
   document.getElementById('remarks').value = data.remarks || '';
 
   document.getElementById('itemsBody').innerHTML = '';
-  rowCount = 0;
   if (data.items && data.items.length > 0) {
     data.items.forEach(item => addItemRow(item.desc, item.qty, item.price));
   } else {
     addItemRow();
   }
-
-  syncSupplierToDisplay();
-  syncRemarksToDisplay();
   recalculate();
 }
 
@@ -258,7 +235,6 @@ function showSavedList() {
       </div>
     `).join('');
   }
-
   document.getElementById('savedModal').classList.remove('hidden');
 }
 
@@ -293,11 +269,8 @@ function newPO() {
   document.getElementById('remarks').value = '';
   document.getElementById('gstRate').value = '18';
   document.getElementById('itemsBody').innerHTML = '';
-  rowCount = 0;
   setAutoFields();
   addItemRow();
-  syncSupplierToDisplay();
-  syncRemarksToDisplay();
   recalculate();
 }
 
@@ -327,14 +300,6 @@ document.getElementById('btnCloseModal').addEventListener('click', () => {
   document.getElementById('savedModal').classList.add('hidden');
 });
 document.getElementById('gstRate').addEventListener('input', recalculate);
-
-// Sync supplier on input
-document.getElementById('supplierName').addEventListener('input', syncSupplierToDisplay);
-document.getElementById('supplierAddress').addEventListener('input', syncSupplierToDisplay);
-document.getElementById('supplierGstin').addEventListener('input', syncSupplierToDisplay);
-document.getElementById('remarks').addEventListener('input', syncRemarksToDisplay);
-
-// Close modal on outside click
 document.getElementById('savedModal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('savedModal')) {
     document.getElementById('savedModal').classList.add('hidden');
@@ -344,4 +309,3 @@ document.getElementById('savedModal').addEventListener('click', (e) => {
 // === Init ===
 setAutoFields();
 addItemRow();
-syncSupplierToDisplay();

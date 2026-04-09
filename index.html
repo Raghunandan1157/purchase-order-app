@@ -8,7 +8,7 @@
 </head>
 <body>
   <div class="container">
-    <!-- Toolbar (hidden in print) -->
+    <!-- Toolbar -->
     <div class="toolbar no-print">
       <button id="btnNew">+ New</button>
       <button id="btnSave">Save</button>
@@ -38,52 +38,50 @@
           <p>admin-ast2@navachetanagroup.com</p>
         </div>
         <div class="date-block">
-          <span class="date-label">Date:</span>
-          <span class="date-value" id="poDateDisplay"></span>
-          <div class="po-num-line">
-            <span class="date-label">PO No:</span>
-            <span class="date-value" id="poNumDisplay"></span>
-          </div>
+          <div class="date-line"><span class="dl">Date:</span> <span id="poDateDisplay"></span></div>
+          <div class="date-line"><span class="dl">PO No:</span> <span id="poNumDisplay"></span></div>
         </div>
       </div>
 
-      <!-- Supplier -->
+      <!-- Supplier (editable inline) -->
       <div class="supplier-block">
         <p class="supplier-label">SUPLIER:</p>
-        <p class="supplier-name" id="printSupplierName"></p>
-        <p class="supplier-addr" id="printSupplierAddr"></p>
-        <p class="supplier-gstin" id="printSupplierGstin"></p>
+        <input type="text" id="supplierName" class="inline-input inline-bold" placeholder="Supplier Name" />
+        <textarea id="supplierAddress" class="inline-textarea" rows="4" placeholder="Supplier Address"></textarea>
+        <input type="text" id="supplierGstin" class="inline-input" placeholder="GSTIN: Enter GSTIN" />
       </div>
 
       <!-- Items Table -->
       <table class="po-table" id="poTable">
         <thead>
           <tr>
-            <th class="col-desc"><!-- description --></th>
+            <th class="col-desc"></th>
             <th class="col-qty">QTY</th>
             <th class="col-price">UNIT PRICE</th>
             <th class="col-total">TOTAL</th>
-            <th class="col-action no-print"><!-- action --></th>
+            <th class="col-action no-print"></th>
           </tr>
         </thead>
-        <tbody id="itemsBody">
-          <!-- JS fills rows -->
-        </tbody>
+        <tbody id="itemsBody"></tbody>
       </table>
 
       <button id="btnAddRow" class="btn-add-row no-print">+ Add Item</button>
 
-      <!-- GST + Grand Total rows (below table) -->
-      <div class="totals-block">
-        <div class="totals-row gst-line">
-          <span class="totals-left">Add GST @ <input type="number" id="gstRate" value="18" min="0" max="100" class="gst-input no-print-inline" /><span class="print-only-gst">18</span>%</span>
-          <span class="totals-right" id="gstAmount">0.00</span>
-        </div>
-        <div class="totals-row grand-line">
-          <span class="totals-left grand-label">Grand TOTAL</span>
-          <span class="totals-right grand-value" id="grandTotal">0.00</span>
-        </div>
-      </div>
+      <!-- Empty rows for print (inserted by JS) -->
+
+      <!-- GST + Grand Total -->
+      <table class="totals-table">
+        <tbody>
+          <tr class="gst-row">
+            <td class="totals-left-cell">Add GST @ <input type="number" id="gstRate" value="18" min="0" max="100" class="gst-input" /><span class="print-gst-val">18</span>%</td>
+            <td class="totals-right-cell" id="gstAmount">0.00</td>
+          </tr>
+          <tr class="grand-row">
+            <td class="totals-left-cell grand-label">Grand TOTAL</td>
+            <td class="totals-right-cell grand-value" id="grandTotal">0.00</td>
+          </tr>
+        </tbody>
+      </table>
 
       <!-- Amount in Words -->
       <div class="words-block">
@@ -92,12 +90,11 @@
         <div class="words-underline"></div>
       </div>
 
-      <!-- Footer: Remarks + Signatory -->
+      <!-- Footer -->
       <div class="footer-block">
         <div class="remarks-side">
           <p class="remarks-label">Remarks / Payment Instructions:</p>
-          <textarea id="remarks" rows="2" class="remarks-input" placeholder="Enter remarks..."></textarea>
-          <p class="remarks-print-text" id="printRemarks"></p>
+          <textarea id="remarks" rows="2" class="inline-textarea remarks-area" placeholder="Enter remarks..."></textarea>
         </div>
         <div class="sign-side">
           <p>For Navachetana Microfin services Pvt Ltd</p>
@@ -108,23 +105,6 @@
 
       <!-- Bottom red bar -->
       <div class="red-bar-bottom"></div>
-    </div>
-
-    <!-- Hidden edit fields (shown only in screen, hidden in print) -->
-    <div class="edit-panel no-print">
-      <h3>Supplier Details</h3>
-      <div class="edit-row">
-        <label>Supplier Name</label>
-        <input type="text" id="supplierName" placeholder="Enter supplier name" />
-      </div>
-      <div class="edit-row">
-        <label>Address</label>
-        <textarea id="supplierAddress" rows="3" placeholder="Enter supplier address"></textarea>
-      </div>
-      <div class="edit-row">
-        <label>GSTIN</label>
-        <input type="text" id="supplierGstin" placeholder="Enter GSTIN" />
-      </div>
     </div>
 
     <!-- Saved POs Modal -->

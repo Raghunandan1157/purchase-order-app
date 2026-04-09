@@ -1,8 +1,4 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -43,14 +39,13 @@ body {
 #btnClear { background: #7f8c8d; color: #fff; }
 #btnClear:hover { background: #6c7a7b; }
 
-/* ===== PO PAGE (the document) ===== */
+/* ===== PO PAGE ===== */
 .po-page {
   background: #fff;
   border: 1px solid #ccc;
-  margin-bottom: 20px;
 }
 
-/* Red bar top */
+/* Red bars */
 .red-bar-top {
   background: #c0392b;
   padding: 12px 30px;
@@ -58,26 +53,23 @@ body {
 }
 .red-bar-top h1 {
   color: #fff;
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
 }
-
-/* Red bar bottom */
 .red-bar-bottom {
   background: #c0392b;
   height: 8px;
 }
 
-/* Header row: company + date */
+/* ===== HEADER ROW ===== */
 .header-row {
   display: flex;
   justify-content: space-between;
-  padding: 16px 30px 10px;
-  border-bottom: 1px solid #ddd;
+  padding: 18px 30px 14px;
 }
 .company-block p {
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: #333;
 }
 .co-name {
@@ -89,46 +81,66 @@ body {
   text-align: right;
   white-space: nowrap;
 }
-.date-label {
-  color: #c0392b;
-  font-weight: 600;
+.date-line {
   font-size: 14px;
+  margin-bottom: 4px;
 }
-.date-value {
+.dl {
   color: #c0392b;
-  font-size: 14px;
+  font-weight: 700;
 }
-.po-num-line {
-  margin-top: 4px;
+.date-line span:not(.dl) {
+  color: #c0392b;
 }
 
-/* Supplier */
+/* ===== SUPPLIER (inline editable) ===== */
 .supplier-block {
-  padding: 12px 30px 16px;
-  border-bottom: 1px solid #ddd;
+  padding: 14px 30px 16px;
+  border-top: 1px solid #eee;
 }
 .supplier-label {
   font-weight: 700;
   color: #c0392b;
   font-size: 13px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
-.supplier-name {
+
+/* Inline inputs (look like text, editable) */
+.inline-input,
+.inline-textarea {
+  display: block;
+  width: 60%;
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 3px 0;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1a1a1a;
+  line-height: 1.5;
+  background: transparent;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.inline-input:hover,
+.inline-textarea:hover {
+  border-bottom-color: #ddd;
+}
+.inline-input:focus,
+.inline-textarea:focus {
+  border-bottom-color: #c0392b;
+  background: #fffef5;
+}
+.inline-bold {
   font-weight: 700;
   font-size: 14px;
-}
-.supplier-addr, .supplier-gstin {
-  font-size: 13px;
-  color: #333;
-  line-height: 1.5;
-  white-space: pre-line;
 }
 
 /* ===== ITEMS TABLE ===== */
 .po-table {
-  width: 100%;
+  width: calc(100% - 60px);
+  margin: 0 30px;
   border-collapse: collapse;
-  margin: 0;
 }
 .po-table thead tr {
   background: #c0392b;
@@ -146,53 +158,51 @@ body {
   border-left: 1px solid #c0392b;
 }
 .po-table th.col-action {
-  background: #ddd;
-  color: #333;
-  width: 50px;
-  border: 1px solid #ccc;
-}
-.po-table td {
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  font-size: 13px;
-  height: 32px;
+  background: transparent;
+  border: none;
+  width: 40px;
 }
 .col-desc { width: auto; }
-.col-qty { width: 80px; text-align: center; }
-.col-price { width: 120px; text-align: right; }
-.col-total { width: 130px; text-align: right; }
-.col-action { width: 50px; text-align: center; }
+.col-qty { width: 70px; }
+.col-price { width: 110px; }
+.col-total { width: 120px; }
+.col-action { width: 40px; }
 
+.po-table td {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  height: 34px;
+}
+.po-table td.action-cell {
+  border: none;
+  text-align: center;
+}
 .po-table td input {
   width: 100%;
   border: none;
   background: transparent;
   font-size: 13px;
   font-family: inherit;
-  padding: 2px 4px;
+  padding: 2px 0;
   outline: none;
 }
 .po-table td input:focus {
-  background: #fffde7;
+  background: #fffef5;
 }
 .po-table td input[type="number"] {
   text-align: right;
 }
-.po-table td.desc-cell input {
-  text-align: left;
-}
-.po-table td.qty-cell input {
-  text-align: center;
-}
+.po-table td.qty-cell input { text-align: center; }
 .row-total-cell {
-  text-align: right;
+  text-align: right !important;
   font-weight: 500;
-  padding-right: 12px;
 }
 
-/* Empty rows for print */
+/* Empty rows */
 .empty-row td {
-  height: 32px;
+  height: 34px;
+  border: 1px solid #ddd;
 }
 
 .btn-remove {
@@ -204,51 +214,52 @@ body {
   height: 24px;
   font-size: 14px;
   cursor: pointer;
+  line-height: 24px;
 }
 .btn-remove:hover { background: #c0392b; }
 
 .btn-add-row {
   display: block;
   width: calc(100% - 60px);
-  margin: 0 30px 10px;
+  margin: 8px 30px 12px;
   padding: 8px;
   background: none;
-  border: 2px dashed #ccc;
+  border: 2px dashed #ddd;
   border-radius: 4px;
-  color: #888;
+  color: #999;
   font-size: 13px;
   cursor: pointer;
+  transition: all 0.2s;
 }
 .btn-add-row:hover {
   border-color: #c0392b;
   color: #c0392b;
 }
 
-/* ===== TOTALS BLOCK ===== */
-.totals-block {
-  border-top: 1px solid #ddd;
+/* ===== TOTALS TABLE ===== */
+.totals-table {
+  width: calc(100% - 60px);
+  margin: 0 30px;
+  border-collapse: collapse;
 }
-.totals-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 30px 8px 30px;
-  border-bottom: 1px solid #ddd;
+.totals-table td {
+  padding: 10px 12px;
   font-size: 13px;
+  border: 1px solid #ddd;
 }
-.totals-left {
-  color: #333;
+.totals-left-cell {
+  text-align: left;
 }
-.totals-right {
+.totals-right-cell {
   text-align: right;
-  min-width: 130px;
-  padding-right: 0;
+  width: 120px;
   font-weight: 500;
 }
 .grand-label {
-  font-weight: 700;
+  font-weight: 700 !important;
 }
 .grand-value {
-  font-weight: 700;
+  font-weight: 700 !important;
 }
 
 .gst-input {
@@ -259,18 +270,14 @@ body {
   font-size: 13px;
   text-align: center;
   font-family: inherit;
-}
-.gst-input:focus {
   outline: none;
-  border-color: #c0392b;
 }
-.print-only-gst {
-  display: none;
-}
+.gst-input:focus { border-color: #c0392b; }
+.print-gst-val { display: none; }
 
-/* ===== AMOUNT IN WORDS ===== */
+/* ===== WORDS ===== */
 .words-block {
-  padding: 16px 30px 8px;
+  padding: 20px 30px 10px;
 }
 .words-label {
   font-weight: 700;
@@ -282,42 +289,26 @@ body {
 .words-underline {
   border-bottom: 1px solid #000;
   margin-top: 4px;
-  width: 60%;
+  width: 65%;
 }
 
 /* ===== FOOTER ===== */
 .footer-block {
   display: flex;
   justify-content: space-between;
-  padding: 12px 30px 20px;
+  padding: 14px 30px 24px;
   gap: 30px;
 }
-.remarks-side {
-  flex: 1;
-}
+.remarks-side { flex: 1; }
 .remarks-label {
   font-size: 12px;
   font-weight: 600;
   color: #555;
   margin-bottom: 4px;
 }
-.remarks-input {
+.remarks-area {
   width: 100%;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 6px 8px;
   font-size: 13px;
-  font-family: inherit;
-  resize: vertical;
-}
-.remarks-input:focus {
-  outline: none;
-  border-color: #c0392b;
-}
-.remarks-print-text {
-  display: none;
-  font-size: 13px;
-  white-space: pre-line;
 }
 .sign-side {
   text-align: center;
@@ -327,53 +318,8 @@ body {
   font-size: 13px;
   color: #333;
 }
-.sig-space {
-  height: 60px;
-}
-.sig-title {
-  font-weight: 500;
-}
-
-/* ===== EDIT PANEL (supplier input) ===== */
-.edit-panel {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px 24px;
-  margin-bottom: 20px;
-}
-.edit-panel h3 {
-  font-size: 15px;
-  margin-bottom: 14px;
-  color: #c0392b;
-}
-.edit-row {
-  margin-bottom: 12px;
-}
-.edit-row label {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
-}
-.edit-row input,
-.edit-row textarea {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  font-family: inherit;
-}
-.edit-row input:focus,
-.edit-row textarea:focus {
-  outline: none;
-  border-color: #c0392b;
-  box-shadow: 0 0 0 2px rgba(192,57,43,0.1);
-}
+.sig-space { height: 60px; }
+.sig-title { font-weight: 500; }
 
 /* ===== MODAL ===== */
 .modal {
@@ -403,11 +349,8 @@ body {
 }
 .modal-header h2 { font-size: 18px; }
 .btn-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #888;
+  background: none; border: none;
+  font-size: 24px; cursor: pointer; color: #888;
 }
 .saved-list { padding: 16px 20px; }
 .saved-item {
@@ -424,12 +367,8 @@ body {
 .saved-item-info small { color: #888; font-size: 12px; }
 .saved-item-actions { display: flex; gap: 6px; }
 .saved-item-actions button {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
+  padding: 6px 12px; border: none; border-radius: 4px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
 }
 .btn-load-item { background: #2980b9; color: #fff; }
 .btn-delete-item { background: #e74c3c; color: #fff; }
@@ -455,87 +394,55 @@ body {
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 @keyframes toastOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
+  from { opacity: 1; } to { opacity: 0; }
 }
 
 /* ========================================
-   PRINT STYLES - Match PDF exactly
+   PRINT STYLES — match original PDF
    ======================================== */
 @media print {
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-
-  body {
-    background: #fff;
-    margin: 0;
-    padding: 0;
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  .container {
-    padding: 0;
-    max-width: 100%;
-  }
-
+  body { background: #fff; margin: 0; padding: 0; }
+  .container { padding: 0; max-width: 100%; }
   .no-print { display: none !important; }
 
-  .po-page {
-    border: none;
-    box-shadow: none;
-  }
+  .po-page { border: none; }
 
   /* Red bars */
-  .red-bar-top {
-    background: #c0392b !important;
-    padding: 10px 30px;
-  }
-  .red-bar-top h1 {
-    color: #fff !important;
-    font-size: 22px;
-  }
-  .red-bar-bottom {
-    background: #c0392b !important;
-    height: 8px;
+  .red-bar-top { background: #c0392b !important; }
+  .red-bar-top h1 { color: #fff !important; }
+  .red-bar-bottom { background: #c0392b !important; }
+
+  /* Date */
+  .dl { color: #c0392b !important; }
+  .date-line span:not(.dl) { color: #c0392b !important; }
+
+  /* Table */
+  .po-table thead tr { background: #c0392b !important; }
+  .po-table th { color: #fff !important; background: #c0392b !important; }
+  .po-table th.col-action { display: none !important; }
+  .po-table td.action-cell { display: none !important; }
+
+  /* Inline inputs become plain text */
+  .inline-input,
+  .inline-textarea,
+  .po-table td input,
+  .remarks-area {
+    border: none !important;
+    border-bottom: none !important;
+    background: transparent !important;
+    padding: 3px 0 !important;
+    box-shadow: none !important;
   }
 
-  /* Date in red */
-  .date-label, .date-value {
-    color: #c0392b !important;
-  }
+  /* GST: hide input, show plain text */
+  .gst-input { display: none !important; }
+  .print-gst-val { display: inline !important; }
 
-  /* Table header red */
-  .po-table thead tr {
-    background: #c0392b !important;
-  }
-  .po-table th {
-    color: #fff !important;
-    border-color: #a93226 !important;
-    background: #c0392b !important;
-  }
-  .po-table th.col-action { display: none; }
-  .po-table td:last-child.action-cell { display: none; }
-
-  /* Table cells - clean borders */
-  .po-table td {
-    border: 1px solid #ddd;
-    padding: 6px 12px;
-  }
-  .po-table td input {
-    border: none;
-    background: transparent;
-    padding: 0;
-  }
-
-  /* GST input: hide input, show static text */
-  .no-print-inline { display: none !important; }
-  .print-only-gst { display: inline !important; }
-
-  /* Remarks: hide textarea, show text */
-  .remarks-input { display: none !important; }
-  .remarks-print-text { display: block !important; }
-
-  /* Edit panel */
-  .edit-panel { display: none !important; }
-
-  /* Page sizing */
+  /* Page */
   @page {
     margin: 10mm;
     size: A4;
@@ -547,4 +454,5 @@ body {
   .header-row { flex-direction: column; }
   .date-block { text-align: left; margin-top: 10px; }
   .footer-block { flex-direction: column; }
+  .inline-input, .inline-textarea { width: 100%; }
 }
