@@ -104,11 +104,8 @@ function addItemRow(desc = '', qty = '', price = '', gst = '18') {
     <td class="price-cell"><input type="number" class="item-price" value="${price}" min="0" step="0.01" placeholder="0.00" /></td>
     <td class="gst-select-cell">
       <select class="item-gst">
-        <option value="0" ${gst === '0' ? 'selected' : ''}>0%</option>
         <option value="5" ${gst === '5' ? 'selected' : ''}>5%</option>
-        <option value="12" ${gst === '12' ? 'selected' : ''}>12%</option>
         <option value="18" ${gst === '18' || !gst ? 'selected' : ''}>18%</option>
-        <option value="28" ${gst === '28' ? 'selected' : ''}>28%</option>
       </select>
     </td>
     <td class="gst-amt-cell">0.00</td>
