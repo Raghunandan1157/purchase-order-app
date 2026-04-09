@@ -1,3 +1,6 @@
+// === Constants ===
+const EMPTY_PRINT_ROWS = 7; // empty rows in table to match PDF layout
+
 // === Auto Date & PO Number ===
 function formatDate(date) {
   const d = String(date.getDate()).padStart(2, '0');
@@ -14,8 +17,8 @@ function generatePONumber() {
 }
 
 function setAutoFields() {
-  document.getElementById('poDate').value = formatDate(new Date());
-  document.getElementById('poNumber').value = generatePONumber();
+  document.getElementById('poDateDisplay').textContent = formatDate(new Date());
+  document.getElementById('poNumDisplay').textContent = generatePONumber();
 }
 
 // === Number to Words (Indian System) ===
@@ -41,50 +44,74 @@ function numberToWords(num) {
   const rupees = Math.floor(num);
   const paise = Math.round((num - rupees) * 100);
 
-  let words = '';
-  if (rupees >= 10000000) {
-    words += threeDigits(Math.floor(rupees / 10000000)) + ' Crore ';
-    num = rupees % 10000000;
-  } else {
-    num = rupees;
+  let result = '';
+  let rem = rupees;
+
+  if (rem >= 10000000) {
+    result += threeDigits(Math.floor(rem / 10000000)) + ' Crore ';
+    rem = rem % 10000000;
   }
-  if (num >= 100000) {
-    words += twoDigits(Math.floor(num / 100000)) + ' Lakh ';
-    num = num % 100000;
+  if (rem >= 100000) {
+    result += twoDigits(Math.floor(rem / 100000)) + ' Lakh ';
+    rem = rem % 100000;
   }
-  if (num >= 1000) {
-    words += twoDigits(Math.floor(num / 1000)) + ' Thousand ';
-    num = num % 1000;
+  if (rem >= 1000) {
+    result += twoDigits(Math.floor(rem / 1000)) + ' Thousand ';
+    rem = rem % 1000;
   }
-  if (num > 0) {
-    words += threeDigits(num);
+  if (rem > 0) {
+    result += threeDigits(rem);
   }
 
-  words = words.trim() + ' Rupees';
+  result = result.trim();
+
+  // Lowercase first letter of each word except first
+  let words = result.charAt(0).toUpperCase() + result.slice(1).toLowerCase();
+
+  words += ' rupees';
   if (paise > 0) {
-    words += ' and ' + twoDigits(paise) + ' Paise';
+    words += ' and ' + twoDigits(paise).toLowerCase() + ' paise';
   }
-  words += ' Only';
+  words += ' only';
   return words;
+}
+
+// === Sync supplier fields to print display ===
+function syncSupplierToDisplay() {
+  const name = document.getElementById('supplierName').value;
+  const addr = document.getElementById('supplierAddress').value;
+  const gstin = document.getElementById('supplierGstin').value;
+
+  document.getElementById('printSupplierName').textContent = name;
+  document.getElementById('printSupplierAddr').textContent = addr;
+  document.getElementById('printSupplierGstin').textContent = gstin ? 'GSTIN: ' + gstin : '';
+}
+
+function syncRemarksToDisplay() {
+  document.getElementById('printRemarks').textContent = document.getElementById('remarks').value;
 }
 
 // === Item Rows ===
 let rowCount = 0;
 
-function addItemRow(desc = '', qty = '', price = '') {
+function createRow(desc, qty, price) {
   rowCount++;
-  const tbody = document.getElementById('itemsBody');
   const tr = document.createElement('tr');
+  tr.className = 'item-row';
   tr.innerHTML = `
-    <td class="col-sno">${rowCount}</td>
-    <td><input type="text" class="item-desc" value="${desc}" placeholder="Item description" /></td>
-    <td><input type="number" class="item-qty" value="${qty}" min="0" placeholder="0" /></td>
-    <td><input type="number" class="item-price" value="${price}" min="0" step="0.01" placeholder="0.00" /></td>
-    <td class="row-total">0.00</td>
-    <td class="no-print" style="text-align:center"><button class="btn-remove" onclick="removeRow(this)">&times;</button></td>
+    <td class="desc-cell"><input type="text" class="item-desc" value="${desc}" placeholder="Item description" /></td>
+    <td class="qty-cell"><input type="number" class="item-qty" value="${qty}" min="0" placeholder="0" /></td>
+    <td class="price-cell"><input type="number" class="item-price" value="${price}" min="0" step="0.01" placeholder="0.00" /></td>
+    <td class="row-total-cell">0.00</td>
+    <td class="action-cell no-print" style="text-align:center"><button class="btn-remove" onclick="removeRow(this)">&times;</button></td>
   `;
-  tbody.appendChild(tr);
+  return tr;
+}
 
+function addItemRow(desc = '', qty = '', price = '') {
+  const tbody = document.getElementById('itemsBody');
+  const tr = createRow(desc, qty, price);
+  tbody.appendChild(tr);
   tr.querySelector('.item-qty').addEventListener('input', recalculate);
   tr.querySelector('.item-price').addEventListener('input', recalculate);
   recalculate();
@@ -92,25 +119,17 @@ function addItemRow(desc = '', qty = '', price = '') {
 
 function removeRow(btn) {
   btn.closest('tr').remove();
-  renumberRows();
+  rowCount = document.querySelectorAll('#itemsBody .item-row').length;
   recalculate();
-}
-
-function renumberRows() {
-  const rows = document.querySelectorAll('#itemsBody tr');
-  rowCount = rows.length;
-  rows.forEach((row, i) => {
-    row.querySelector('.col-sno').textContent = i + 1;
-  });
 }
 
 function recalculate() {
   let subtotal = 0;
-  document.querySelectorAll('#itemsBody tr').forEach(row => {
+  document.querySelectorAll('#itemsBody .item-row').forEach(row => {
     const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
     const price = parseFloat(row.querySelector('.item-price').value) || 0;
     const total = qty * price;
-    row.querySelector('.row-total').textContent = total.toFixed(2);
+    row.querySelector('.row-total-cell').textContent = formatNumber(total);
     subtotal += total;
   });
 
@@ -118,16 +137,53 @@ function recalculate() {
   const gstAmount = subtotal * gstRate / 100;
   const grandTotal = subtotal + gstAmount;
 
-  document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-  document.getElementById('gstAmount').textContent = gstAmount.toFixed(2);
-  document.getElementById('grandTotal').textContent = grandTotal.toFixed(2);
-  document.getElementById('amountWords').value = numberToWords(grandTotal);
+  document.getElementById('gstAmount').textContent = formatNumber(gstAmount);
+  document.getElementById('grandTotal').textContent = formatNumber(grandTotal);
+  document.getElementById('amountWords').textContent = numberToWords(grandTotal);
+
+  // Update the print-only GST rate text
+  document.querySelector('.print-only-gst').textContent = gstRate;
+}
+
+function formatNumber(num) {
+  return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// === Print: add empty rows to match PDF layout ===
+function prepareForPrint() {
+  syncSupplierToDisplay();
+  syncRemarksToDisplay();
+
+  // Remove old empty rows
+  document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
+
+  // Count actual item rows
+  const itemRows = document.querySelectorAll('#itemsBody .item-row').length;
+  const totalRowsNeeded = Math.max(itemRows + EMPTY_PRINT_ROWS, 8);
+  const emptyNeeded = totalRowsNeeded - itemRows;
+
+  const tbody = document.getElementById('itemsBody');
+  for (let i = 0; i < emptyNeeded; i++) {
+    const tr = document.createElement('tr');
+    tr.className = 'empty-row';
+    tr.innerHTML = `
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+      <td>&nbsp;</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function cleanupAfterPrint() {
+  document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
 }
 
 // === Local Storage ===
 function getFormData() {
   const items = [];
-  document.querySelectorAll('#itemsBody tr').forEach(row => {
+  document.querySelectorAll('#itemsBody .item-row').forEach(row => {
     items.push({
       desc: row.querySelector('.item-desc').value,
       qty: row.querySelector('.item-qty').value,
@@ -136,8 +192,8 @@ function getFormData() {
   });
 
   return {
-    poDate: document.getElementById('poDate').value,
-    poNumber: document.getElementById('poNumber').value,
+    poDate: document.getElementById('poDateDisplay').textContent,
+    poNumber: document.getElementById('poNumDisplay').textContent,
     supplierName: document.getElementById('supplierName').value,
     supplierAddress: document.getElementById('supplierAddress').value,
     supplierGstin: document.getElementById('supplierGstin').value,
@@ -149,8 +205,8 @@ function getFormData() {
 }
 
 function loadFormData(data) {
-  document.getElementById('poDate').value = data.poDate || '';
-  document.getElementById('poNumber').value = data.poNumber || '';
+  document.getElementById('poDateDisplay').textContent = data.poDate || '';
+  document.getElementById('poNumDisplay').textContent = data.poNumber || '';
   document.getElementById('supplierName').value = data.supplierName || '';
   document.getElementById('supplierAddress').value = data.supplierAddress || '';
   document.getElementById('supplierGstin').value = data.supplierGstin || '';
@@ -164,6 +220,9 @@ function loadFormData(data) {
   } else {
     addItemRow();
   }
+
+  syncSupplierToDisplay();
+  syncRemarksToDisplay();
   recalculate();
 }
 
@@ -237,6 +296,8 @@ function newPO() {
   rowCount = 0;
   setAutoFields();
   addItemRow();
+  syncSupplierToDisplay();
+  syncRemarksToDisplay();
   recalculate();
 }
 
@@ -244,7 +305,6 @@ function newPO() {
 function showToast(message) {
   const existing = document.querySelector('.toast');
   if (existing) existing.remove();
-
   const toast = document.createElement('div');
   toast.className = 'toast';
   toast.textContent = message;
@@ -255,7 +315,11 @@ function showToast(message) {
 // === Event Listeners ===
 document.getElementById('btnNew').addEventListener('click', newPO);
 document.getElementById('btnSave').addEventListener('click', savePO);
-document.getElementById('btnPrint').addEventListener('click', () => window.print());
+document.getElementById('btnPrint').addEventListener('click', () => {
+  prepareForPrint();
+  window.print();
+  setTimeout(cleanupAfterPrint, 500);
+});
 document.getElementById('btnLoad').addEventListener('click', showSavedList);
 document.getElementById('btnClear').addEventListener('click', clearAllPOs);
 document.getElementById('btnAddRow').addEventListener('click', () => addItemRow());
@@ -263,6 +327,12 @@ document.getElementById('btnCloseModal').addEventListener('click', () => {
   document.getElementById('savedModal').classList.add('hidden');
 });
 document.getElementById('gstRate').addEventListener('input', recalculate);
+
+// Sync supplier on input
+document.getElementById('supplierName').addEventListener('input', syncSupplierToDisplay);
+document.getElementById('supplierAddress').addEventListener('input', syncSupplierToDisplay);
+document.getElementById('supplierGstin').addEventListener('input', syncSupplierToDisplay);
+document.getElementById('remarks').addEventListener('input', syncRemarksToDisplay);
 
 // Close modal on outside click
 document.getElementById('savedModal').addEventListener('click', (e) => {
@@ -274,3 +344,4 @@ document.getElementById('savedModal').addEventListener('click', (e) => {
 // === Init ===
 setAutoFields();
 addItemRow();
+syncSupplierToDisplay();
