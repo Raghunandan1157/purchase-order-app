@@ -14,12 +14,8 @@ function generatePONumber() {
 }
 
 function setAutoFields() {
-  const dateEl = document.getElementById('poDateDisplay');
-  const numEl = document.getElementById('poNumDisplay');
-  const savedDate = localStorage.getItem('poDate');
-  const savedNum = localStorage.getItem('poNum');
-  dateEl.textContent = savedDate || formatDate(new Date());
-  numEl.textContent = savedNum || generatePONumber();
+  document.getElementById('poDateDisplay').textContent = formatDate(new Date());
+  document.getElementById('poNumDisplay').textContent = generatePONumber();
 }
 
 // === Number to Words (Indian System) ===
@@ -340,22 +336,50 @@ document.getElementById('savedModal').addEventListener('click', (e) => {
   picker.addEventListener('change', () => {
     if (!picker.value) return;
     const [y, m, d] = picker.value.split('-');
-    const formatted = `${d}/${m}/${y}`;
-    display.textContent = formatted;
-    localStorage.setItem('poDate', formatted);
+    display.textContent = `${d}/${m}/${y}`;
   });
 })();
 
 // === Click-to-edit fields ===
+function addResetButton(el, onReset) {
+  const wrap = document.createElement('span');
+  wrap.className = 'editable-wrap';
+  el.parentNode.insertBefore(wrap, el);
+  wrap.appendChild(el);
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'editable-reset no-print';
+  btn.title = 'Reset to default';
+  btn.textContent = '↺';
+  btn.addEventListener('mousedown', (e) => e.preventDefault());
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    onReset();
+  });
+  wrap.appendChild(btn);
+}
+
 (function initEditables() {
   document.querySelectorAll('.editable').forEach((el) => {
-    if (el.dataset.picker) return;
     const key = el.dataset.key;
     const def = el.dataset.default || el.textContent;
+    const sessionOnly = el.dataset.sessionOnly === '1';
+    const isPicker = !!el.dataset.picker;
 
-    if (key && localStorage.getItem(key)) {
+    if (key && !sessionOnly && localStorage.getItem(key)) {
       el.textContent = localStorage.getItem(key);
     }
+
+    if (key && !sessionOnly) {
+      addResetButton(el, () => {
+        localStorage.removeItem(key);
+        el.textContent = def;
+      });
+    }
+
+    if (isPicker) return;
 
     let previous = '';
     el.addEventListener('click', () => {
@@ -370,7 +394,7 @@ document.getElementById('savedModal').addEventListener('click', (e) => {
       const val = el.textContent.trim() || def || previous;
       el.textContent = val;
       el.contentEditable = 'false';
-      if (key) localStorage.setItem(key, val);
+      if (key && !sessionOnly) localStorage.setItem(key, val);
     }
 
     el.addEventListener('blur', commit);
@@ -385,6 +409,34 @@ document.getElementById('savedModal').addEventListener('click', (e) => {
     });
   });
 })();
+
+// === PDF export ===
+function savePDF() {
+  if (typeof html2pdf === 'undefined') {
+    showToast('PDF library still loading, try again');
+    return;
+  }
+  prepareForPrint();
+  const el = document.getElementById('purchaseOrder');
+  const filename = (document.getElementById('poNumDisplay').textContent || 'PO').trim() + '.pdf';
+  const opt = {
+    margin: 10,
+    filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(el).save().then(cleanupAfterPrint).catch(() => cleanupAfterPrint());
+}
+document.getElementById('btnPdf').addEventListener('click', savePDF);
+
+// === Ctrl/Cmd+S shortcut ===
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+    e.preventDefault();
+    savePO();
+  }
+});
 
 // === Init ===
 setAutoFields();

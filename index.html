@@ -14,6 +14,7 @@
       <button id="btnNew">+ New</button>
       <button id="btnSave">Save</button>
       <button id="btnPrint">Print</button>
+      <button id="btnPdf">PDF</button>
       <button id="btnLoad">Load Saved</button>
       <button id="btnClear">Clear All</button>
     </div>
@@ -39,8 +40,8 @@
           <p><span class="editable" data-key="companyEmail" data-default="admin-ast2@navachetanagroup.com" title="Click to edit">admin-ast2@navachetanagroup.com</span></p>
         </div>
         <div class="date-block">
-          <div class="date-line"><span class="dl">Date:</span> <span id="poDateDisplay" class="editable" data-key="poDate" data-picker="date" title="Click to choose date"></span><input type="date" id="poDatePicker" class="hidden-picker" /></div>
-          <div class="date-line"><span class="dl">PO No:</span> <span id="poNumDisplay" class="editable" data-key="poNum" title="Click to edit"></span></div>
+          <div class="date-line"><span class="dl">Date:</span> <span id="poDateDisplay" class="editable" data-key="poDate" data-picker="date" data-session-only="1" title="Click to choose date"></span><input type="date" id="poDatePicker" class="hidden-picker" /></div>
+          <div class="date-line"><span class="dl">PO No:</span> <span id="poNumDisplay" class="editable" data-key="poNum" data-session-only="1" title="Click to edit"></span></div>
         </div>
       </div>
 
@@ -124,6 +125,7 @@
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
