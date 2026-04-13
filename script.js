@@ -410,7 +410,6 @@ function addResetButton(el, onReset) {
       if (el.isContentEditable) return;
       previous = el.textContent;
       el.contentEditable = 'true';
-      el.textContent = '';
       el.focus();
     });
 
