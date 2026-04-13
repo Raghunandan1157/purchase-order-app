@@ -38,8 +38,9 @@ function numberToWords(num) {
     return twoDigits(n);
   }
 
-  const rupees = Math.floor(num);
-  const paise = Math.round((num - rupees) * 100);
+  const totalPaise = Math.round(num * 100);
+  const rupees = Math.floor(totalPaise / 100);
+  const paise = totalPaise % 100;
 
   let result = '';
   let rem = rupees;
