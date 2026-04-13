@@ -318,9 +318,38 @@ document.getElementById('savedModal').addEventListener('click', (e) => {
   }
 });
 
+// === Date picker for PO Date ===
+(function initDatePicker() {
+  const display = document.getElementById('poDateDisplay');
+  const picker = document.getElementById('poDatePicker');
+  if (!display || !picker) return;
+
+  function toISO(ddmmyyyy) {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(ddmmyyyy || '');
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+  }
+
+  display.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    picker.value = toISO(display.textContent.trim()) || toISO(formatDate(new Date()));
+    if (typeof picker.showPicker === 'function') picker.showPicker();
+    else picker.focus();
+  });
+
+  picker.addEventListener('change', () => {
+    if (!picker.value) return;
+    const [y, m, d] = picker.value.split('-');
+    const formatted = `${d}/${m}/${y}`;
+    display.textContent = formatted;
+    localStorage.setItem('poDate', formatted);
+  });
+})();
+
 // === Click-to-edit fields ===
 (function initEditables() {
   document.querySelectorAll('.editable').forEach((el) => {
+    if (el.dataset.picker) return;
     const key = el.dataset.key;
     const def = el.dataset.default || el.textContent;
 
