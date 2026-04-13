@@ -175,6 +175,16 @@ body {
 .supplier-block {
   padding: 14px 30px 16px;
   border-top: 1px solid #eee;
+  display: flex;
+  gap: 30px;
+}
+.supplier-col {
+  flex: 1;
+  min-width: 0;
+}
+.supplier-col .inline-input,
+.supplier-col .inline-textarea {
+  width: 100%;
 }
 .supplier-label {
   font-weight: 700;
@@ -584,7 +594,7 @@ body {
   .date-block { text-align: left; margin-top: 10px; }
   .footer-block { flex-direction: column; gap: 14px; }
   .inline-input, .inline-textarea { width: 100%; }
-  .supplier-block { padding: 10px 16px; }
+  .supplier-block { padding: 10px 16px; flex-direction: column; gap: 14px; }
   .po-table-wrap, .po-page { overflow-x: auto; }
   .po-table { font-size: 11px; min-width: 520px; }
   .totals-table { width: 100% !important; }

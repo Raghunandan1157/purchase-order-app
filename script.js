@@ -214,6 +214,8 @@ function getFormData() {
     supplierName: document.getElementById('supplierName').value,
     supplierAddress: document.getElementById('supplierAddress').value,
     supplierGstin: document.getElementById('supplierGstin').value,
+    shippingName: document.getElementById('shippingName').value,
+    shippingAddress: document.getElementById('shippingAddress').value,
     remarks: document.getElementById('remarks').value,
     items,
     savedAt: new Date().toISOString(),
@@ -226,6 +228,8 @@ function loadFormData(data) {
   document.getElementById('supplierName').value = data.supplierName || '';
   document.getElementById('supplierAddress').value = data.supplierAddress || '';
   document.getElementById('supplierGstin').value = data.supplierGstin || '';
+  document.getElementById('shippingName').value = data.shippingName || '';
+  document.getElementById('shippingAddress').value = data.shippingAddress || '';
   document.getElementById('remarks').value = data.remarks || '';
 
   document.getElementById('itemsBody').innerHTML = '';
@@ -300,6 +304,8 @@ function newPO() {
   document.getElementById('supplierName').value = '';
   document.getElementById('supplierAddress').value = '';
   document.getElementById('supplierGstin').value = '';
+  document.getElementById('shippingName').value = '';
+  document.getElementById('shippingAddress').value = '';
   document.getElementById('remarks').value = '';
   document.getElementById('itemsBody').innerHTML = '';
   setAutoFields();

@@ -45,12 +45,19 @@
         </div>
       </div>
 
-      <!-- Supplier (editable inline) -->
+      <!-- Supplier + Shipping (editable inline) -->
       <div class="supplier-block">
-        <p class="supplier-label">SUPPLIER:</p>
-        <input type="text" id="supplierName" class="inline-input inline-bold" placeholder="Supplier Name" />
-        <textarea id="supplierAddress" class="inline-textarea" rows="4" placeholder="Supplier Address"></textarea>
-        <input type="text" id="supplierGstin" class="inline-input" placeholder="GSTIN: Enter GSTIN" />
+        <div class="supplier-col">
+          <p class="supplier-label">SUPPLIER:</p>
+          <input type="text" id="supplierName" class="inline-input inline-bold" placeholder="Supplier Name" />
+          <textarea id="supplierAddress" class="inline-textarea" rows="4" placeholder="Supplier Address"></textarea>
+          <input type="text" id="supplierGstin" class="inline-input" placeholder="GSTIN: Enter GSTIN" />
+        </div>
+        <div class="supplier-col">
+          <p class="supplier-label">SHIPPING ADDRESS:</p>
+          <input type="text" id="shippingName" class="inline-input inline-bold" placeholder="Shipping Name" />
+          <textarea id="shippingAddress" class="inline-textarea" rows="4" placeholder="Shipping Address"></textarea>
+        </div>
       </div>
 
       <!-- Items Table with per-item GST -->
