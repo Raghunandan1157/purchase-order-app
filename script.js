@@ -94,13 +94,18 @@ function formatINR(num) {
 }
 
 // === Item Rows (with per-item GST) ===
-function addItemRow(desc = '', qty = '', price = '', gst = '18') {
+function getQty(row) {
+  const raw = parseFloat(row.querySelector('.item-qty').value);
+  return isFinite(raw) && raw > 0 ? raw : 1;
+}
+
+function addItemRow(desc = '', qty = '', price = '', gst = '18', total = '') {
   const tbody = document.getElementById('itemsBody');
   const tr = document.createElement('tr');
   tr.className = 'item-row';
   tr.innerHTML = `
     <td class="desc-cell"><input type="text" class="item-desc" value="${desc}" placeholder="Item description" /></td>
-    <td class="qty-cell"><input type="number" class="item-qty" value="${qty}" min="0" placeholder="0" /></td>
+    <td class="qty-cell"><input type="number" class="item-qty" value="${qty}" min="0" placeholder="1" /></td>
     <td class="price-cell"><input type="number" class="item-price" value="${price}" min="0" step="0.01" placeholder="0.00" /></td>
     <td class="gst-select-cell">
       <select class="item-gst">
@@ -109,18 +114,38 @@ function addItemRow(desc = '', qty = '', price = '', gst = '18') {
       </select>
     </td>
     <td class="gst-amt-cell">0.00</td>
-    <td class="row-total-cell">0.00</td>
+    <td class="row-total-cell"><input type="number" class="item-total" value="${total}" min="0" step="0.01" placeholder="0.00" /></td>
     <td class="action-cell no-print"><button class="btn-remove" onclick="removeRow(this)">&times;</button></td>
   `;
   tbody.appendChild(tr);
-  tr.querySelector('.item-qty').addEventListener('input', recalculate);
-  tr.querySelector('.item-price').addEventListener('input', recalculate);
-  tr.querySelector('.item-gst').addEventListener('change', recalculate);
-  recalculate();
+  tr.querySelector('.item-qty').addEventListener('input', () => recalcRow(tr, 'price'));
+  tr.querySelector('.item-price').addEventListener('input', () => recalcRow(tr, 'price'));
+  tr.querySelector('.item-gst').addEventListener('change', () => recalcRow(tr, 'price'));
+  tr.querySelector('.item-total').addEventListener('input', () => recalcRow(tr, 'total'));
+  recalcRow(tr, 'price');
 }
 
 function removeRow(btn) {
   btn.closest('tr').remove();
+  recalculate();
+}
+
+function recalcRow(row, source) {
+  const qty = getQty(row);
+  const gst = parseFloat(row.querySelector('.item-gst').value) || 0;
+  const priceInput = row.querySelector('.item-price');
+  const totalInput = row.querySelector('.item-total');
+
+  if (source === 'total') {
+    const total = parseFloat(totalInput.value) || 0;
+    const lineSub = total / (1 + gst / 100);
+    const unitPrice = lineSub / qty;
+    priceInput.value = total > 0 ? unitPrice.toFixed(2) : '';
+  } else {
+    const price = parseFloat(priceInput.value) || 0;
+    const total = price * qty * (1 + gst / 100);
+    totalInput.value = price > 0 ? total.toFixed(2) : '';
+  }
   recalculate();
 }
 
@@ -129,18 +154,15 @@ function recalculate() {
   let totalGst = 0;
 
   document.querySelectorAll('#itemsBody .item-row').forEach(row => {
-    const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+    const qty = getQty(row);
     const price = parseFloat(row.querySelector('.item-price').value) || 0;
     const gstPercent = parseFloat(row.querySelector('.item-gst').value) || 0;
 
-    const lineTotal = qty * price;
-    const lineGst = lineTotal * gstPercent / 100;
-    const lineGrand = lineTotal + lineGst;
-
+    const lineSub = qty * price;
+    const lineGst = lineSub * gstPercent / 100;
     row.querySelector('.gst-amt-cell').textContent = formatINR(lineGst);
-    row.querySelector('.row-total-cell').textContent = formatINR(lineGrand);
 
-    subtotal += lineTotal;
+    subtotal += lineSub;
     totalGst += lineGst;
   });
 
@@ -181,6 +203,7 @@ function getFormData() {
       qty: row.querySelector('.item-qty').value,
       price: row.querySelector('.item-price').value,
       gst: row.querySelector('.item-gst').value,
+      total: row.querySelector('.item-total').value,
     });
   });
 
@@ -206,7 +229,7 @@ function loadFormData(data) {
 
   document.getElementById('itemsBody').innerHTML = '';
   if (data.items && data.items.length > 0) {
-    data.items.forEach(item => addItemRow(item.desc, item.qty, item.price, item.gst || '18'));
+    data.items.forEach(item => addItemRow(item.desc, item.qty, item.price, item.gst || '18', item.total || ''));
   } else {
     addItemRow();
   }

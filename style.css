@@ -302,6 +302,23 @@ body {
   text-align: right;
   font-weight: 500;
 }
+.po-table td.row-total-cell input.item-total {
+  text-align: right;
+  font-weight: 600;
+  border: 1px solid #e0c3bf;
+  border-radius: 4px;
+  background: #fdf6f5;
+  padding: 4px 6px;
+  width: 100%;
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.po-table td.row-total-cell input.item-total:focus {
+  border-color: #c0392b;
+  background: #fff;
+}
 
 .empty-row td {
   height: 32px;
