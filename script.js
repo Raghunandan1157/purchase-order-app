@@ -14,8 +14,12 @@ function generatePONumber() {
 }
 
 function setAutoFields() {
-  document.getElementById('poDateDisplay').textContent = formatDate(new Date());
-  document.getElementById('poNumDisplay').textContent = generatePONumber();
+  const dateEl = document.getElementById('poDateDisplay');
+  const numEl = document.getElementById('poNumDisplay');
+  const savedDate = localStorage.getItem('poDate');
+  const savedNum = localStorage.getItem('poNum');
+  dateEl.textContent = savedDate || formatDate(new Date());
+  numEl.textContent = savedNum || generatePONumber();
 }
 
 // === Number to Words (Indian System) ===
@@ -313,6 +317,45 @@ document.getElementById('savedModal').addEventListener('click', (e) => {
     document.getElementById('savedModal').classList.add('hidden');
   }
 });
+
+// === Click-to-edit fields ===
+(function initEditables() {
+  document.querySelectorAll('.editable').forEach((el) => {
+    const key = el.dataset.key;
+    const def = el.dataset.default || el.textContent;
+
+    if (key && localStorage.getItem(key)) {
+      el.textContent = localStorage.getItem(key);
+    }
+
+    let previous = '';
+    el.addEventListener('click', () => {
+      if (el.isContentEditable) return;
+      previous = el.textContent;
+      el.contentEditable = 'true';
+      el.textContent = '';
+      el.focus();
+    });
+
+    function commit() {
+      const val = el.textContent.trim() || def || previous;
+      el.textContent = val;
+      el.contentEditable = 'false';
+      if (key) localStorage.setItem(key, val);
+    }
+
+    el.addEventListener('blur', commit);
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        el.textContent = previous;
+        el.contentEditable = 'false';
+        el.blur();
+      }
+    });
+  });
+})();
 
 // === Init ===
 setAutoFields();

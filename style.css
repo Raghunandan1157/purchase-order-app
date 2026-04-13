@@ -76,6 +76,19 @@ body {
   font-size: 15px !important;
   color: #000 !important;
 }
+.editable {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  outline: none;
+}
+.editable:hover { border-bottom-color: #888; }
+.editable[contenteditable="true"] {
+  border-bottom: 1px solid #c0392b;
+  cursor: text;
+}
+@media print {
+  .editable { border-bottom: none !important; cursor: default; }
+}
 .date-block {
   text-align: right;
   white-space: nowrap;
