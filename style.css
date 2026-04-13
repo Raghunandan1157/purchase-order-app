@@ -482,6 +482,38 @@ body {
 }
 
 /* ========================================
+   PDF EXPORT STYLES (mirrors print)
+   ======================================== */
+.pdf-export .no-print { display: none !important; }
+.pdf-export .po-page { border: none !important; }
+.pdf-export .editable {
+  background: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  min-width: 0 !important;
+}
+.pdf-export .inline-input,
+.pdf-export .inline-textarea,
+.pdf-export .po-table td input,
+.pdf-export .po-table td select,
+.pdf-export .remarks-area {
+  border: none !important;
+  border-bottom: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+.pdf-export .red-bar-top { background: #c0392b !important; }
+.pdf-export .red-bar-top h1 { color: #fff !important; }
+.pdf-export .red-bar-bottom { background: #c0392b !important; }
+.pdf-export .dl,
+.pdf-export .date-line span:not(.dl) { color: #c0392b !important; }
+.pdf-export .po-table thead tr,
+.pdf-export .po-table th { background: #c0392b !important; color: #fff !important; }
+
+/* ========================================
    PRINT STYLES
    ======================================== */
 @media print {
