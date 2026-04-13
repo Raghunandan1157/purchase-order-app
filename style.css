@@ -78,16 +78,42 @@ body {
 }
 .editable {
   cursor: pointer;
-  border-bottom: 1px dashed transparent;
+  display: inline-block;
+  min-width: 1px;
+  min-height: 1em;
+  padding: 0 4px;
+  margin: 0 -4px;
+  border-radius: 3px;
   outline: none;
+  box-shadow: inset 0 -1px 0 transparent;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
-.editable:hover { border-bottom-color: #888; }
+.editable:hover {
+  background-color: rgba(192, 57, 43, 0.08);
+  box-shadow: inset 0 -1px 0 rgba(192, 57, 43, 0.45);
+}
 .editable[contenteditable="true"] {
-  border-bottom: 1px solid #c0392b;
   cursor: text;
+  background-color: rgba(192, 57, 43, 0.12);
+  box-shadow: inset 0 -2px 0 #c0392b;
+  min-width: 180px;
+  animation: editableIn 0.25s ease;
+}
+@keyframes editableIn {
+  0%   { background-color: rgba(192, 57, 43, 0); box-shadow: inset 0 0 0 transparent; }
+  60%  { background-color: rgba(192, 57, 43, 0.22); }
+  100% { background-color: rgba(192, 57, 43, 0.12); box-shadow: inset 0 -2px 0 #c0392b; }
 }
 @media print {
-  .editable { border-bottom: none !important; cursor: default; }
+  .editable {
+    background: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-width: 0 !important;
+    cursor: default;
+    animation: none !important;
+  }
 }
 .date-block {
   text-align: right;
