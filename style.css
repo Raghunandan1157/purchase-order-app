@@ -181,10 +181,31 @@ body {
 .supplier-col {
   flex: 1;
   min-width: 0;
-  padding: 12px 14px;
+  padding: 0;
 }
 .supplier-col + .supplier-col {
   border-left: 1px solid #333;
+}
+.supplier-col > .supplier-label,
+.supplier-col > #supplierName,
+.supplier-col > #shippingName,
+.supplier-col > .address-lines > .addr-line,
+.supplier-col > .gstin-row {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  margin: 0;
+  border-bottom: 1px solid #333;
+}
+.supplier-col > .gstin-row { border-bottom: none; }
+.supplier-col > #supplierGstin { border-bottom: none; }
+.address-lines {
+  display: block;
+  margin: 0;
+  gap: 0;
+}
+.address-lines .addr-line {
+  border-bottom: 1px solid #333;
 }
 .supplier-col .inline-input,
 .supplier-col .inline-textarea {
