@@ -472,8 +472,8 @@ function addResetButton(el, onReset) {
   });
 })();
 
-// === PDF export ===
-function savePDF() {
+// === PDF export (forced single A4 page) ===
+async function savePDF() {
   if (typeof html2pdf === 'undefined') {
     showToast('PDF library still loading, try again');
     return;
@@ -481,19 +481,44 @@ function savePDF() {
   prepareForPrint();
   const el = document.getElementById('purchaseOrder');
   const filename = (document.getElementById('poNumDisplay').textContent || 'PO').trim() + '.pdf';
-  const opt = {
-    margin: 10,
-    filename,
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: {
+
+  try {
+    const canvas = await html2canvas(el, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       onclone: (doc) => { doc.body.classList.add('pdf-export'); }
-    },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
-  html2pdf().set(opt).from(el).save().then(cleanupAfterPrint).catch(() => cleanupAfterPrint());
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 8;
+    const maxW = pageW - margin * 2;
+    const maxH = pageH - margin * 2;
+
+    // Scale to fit whichever dimension constrains — ensures single page
+    const canvasRatio = canvas.width / canvas.height;
+    const boxRatio = maxW / maxH;
+    let imgW, imgH;
+    if (canvasRatio > boxRatio) {
+      imgW = maxW;
+      imgH = maxW / canvasRatio;
+    } else {
+      imgH = maxH;
+      imgW = maxH * canvasRatio;
+    }
+    const x = (pageW - imgW) / 2;
+    const y = margin;
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', x, y, imgW, imgH);
+    pdf.save(filename);
+  } catch (err) {
+    console.error(err);
+    showToast('PDF export failed');
+  } finally {
+    cleanupAfterPrint();
+  }
 }
 document.getElementById('btnPdf').addEventListener('click', savePDF);
 
