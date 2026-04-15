@@ -73,12 +73,13 @@ body {
   font-weight: 500;
 }
 .co-name {
-  font-weight: 800;
-  font-size: 18px !important;
+  font-weight: 900 !important;
+  font-size: 19px !important;
   color: #000 !important;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
   margin-bottom: 4px;
+  -webkit-text-stroke: 0.4px #000;
 }
 .editable {
   cursor: pointer;
