@@ -175,12 +175,25 @@ function recalculate() {
   document.getElementById('amountWords').textContent = numberToWords(grandTotal);
 }
 
-// === Print: add empty rows ===
+// === Print: add empty rows + auto-fit to single A4 ===
+const A4_CONTENT_HEIGHT_PX = 1050; // A4 @ 96dpi minus ~10mm margins
+
+function fitToSinglePage() {
+  const page = document.getElementById('purchaseOrder');
+  page.classList.remove('compact', 'ultra-compact', 'mini');
+  if (page.offsetHeight <= A4_CONTENT_HEIGHT_PX) return;
+  page.classList.add('compact');
+  if (page.offsetHeight <= A4_CONTENT_HEIGHT_PX) return;
+  page.classList.add('ultra-compact');
+  if (page.offsetHeight <= A4_CONTENT_HEIGHT_PX) return;
+  page.classList.add('mini');
+}
+
 function prepareForPrint() {
   document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
 
   const itemCount = document.querySelectorAll('#itemsBody .item-row').length;
-  const emptyNeeded = Math.max(4 - itemCount, 0);
+  const emptyNeeded = itemCount >= 8 ? 0 : Math.max(4 - itemCount, 0);
 
   const tbody = document.getElementById('itemsBody');
   for (let i = 0; i < emptyNeeded; i++) {
@@ -189,10 +202,14 @@ function prepareForPrint() {
     tr.innerHTML = '<td></td><td></td><td></td><td></td><td></td><td></td>';
     tbody.appendChild(tr);
   }
+
+  fitToSinglePage();
 }
 
 function cleanupAfterPrint() {
   document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
+  const page = document.getElementById('purchaseOrder');
+  page.classList.remove('compact', 'ultra-compact', 'mini');
 }
 
 // === Address helpers (5 stacked lines per address) ===
