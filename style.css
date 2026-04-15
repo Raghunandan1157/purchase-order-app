@@ -69,7 +69,8 @@ body {
 .company-block p {
   font-size: 13px;
   line-height: 1.65;
-  color: #333;
+  color: #000;
+  font-weight: 500;
 }
 .co-name {
   font-weight: 700;
@@ -169,6 +170,15 @@ body {
 }
 .date-line span:not(.dl) {
   color: #c0392b;
+}
+.date-line.contact-line {
+  color: #000;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+.date-line.contact-line span:not(.dl) {
+  color: #000;
 }
 
 /* ===== SUPPLIER ===== */
