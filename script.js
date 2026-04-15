@@ -474,7 +474,7 @@ function addResetButton(el, onReset) {
 
 // === PDF export (forced single A4 page) ===
 async function savePDF() {
-  if (typeof html2pdf === 'undefined') {
+  if (typeof html2canvas === 'undefined' || !window.jspdf) {
     showToast('PDF library still loading, try again');
     return;
   }
