@@ -64,15 +64,7 @@ body {
 .header-row {
   display: flex;
   justify-content: space-between;
-  padding: 14px 16px;
-  margin: 10px 30px 4px;
-  border: 1px solid #333;
-  gap: 20px;
-}
-.header-row .company-block { flex: 1; min-width: 0; }
-.header-row .date-block {
-  padding-left: 16px;
-  border-left: 1px solid #333;
+  padding: 18px 30px 14px;
 }
 .company-block p {
   font-size: 13px;
@@ -433,9 +425,7 @@ body {
 
 /* ===== WORDS ===== */
 .words-block {
-  padding: 12px 14px;
-  margin: 14px 30px;
-  border: 1px solid #333;
+  padding: 20px 30px 10px;
 }
 .words-label {
   font-weight: 700;
@@ -454,19 +444,10 @@ body {
 .footer-block {
   display: flex;
   justify-content: space-between;
-  padding: 14px 16px;
-  margin: 4px 30px 20px;
-  gap: 0;
-  border: 1px solid #333;
+  padding: 14px 30px 24px;
+  gap: 30px;
 }
-.remarks-side {
-  flex: 1;
-  padding-right: 16px;
-}
-.footer-block .sign-side {
-  border-left: 1px solid #333;
-  padding-left: 16px;
-}
+.remarks-side { flex: 1; }
 .remarks-label {
   font-size: 12px;
   font-weight: 600;
