@@ -187,8 +187,6 @@ body {
   border-left: 1px solid #333;
 }
 .supplier-col > .supplier-label,
-.supplier-col > #supplierName,
-.supplier-col > #shippingName,
 .supplier-col > .address-lines > .addr-line,
 .supplier-col > .gstin-row {
   display: block;
@@ -206,6 +204,10 @@ body {
 }
 .address-lines .addr-line {
   border-bottom: 1px solid #333;
+}
+.address-lines .addr-line[data-idx="1"] {
+  font-weight: 700;
+  font-size: 14px;
 }
 .supplier-col .inline-input,
 .supplier-col .inline-textarea {

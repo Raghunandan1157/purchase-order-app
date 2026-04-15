@@ -230,11 +230,9 @@ function getFormData() {
   return {
     poDate: document.getElementById('poDateDisplay').textContent,
     poNumber: document.getElementById('poNumDisplay').textContent,
-    supplierName: document.getElementById('supplierName').value,
     supplierAddressLines,
     supplierAddress: supplierAddressLines.join('\n'),
     supplierGstin: document.getElementById('supplierGstin').value,
-    shippingName: document.getElementById('shippingName').value,
     shippingAddressLines,
     shippingAddress: shippingAddressLines.join('\n'),
     remarks: document.getElementById('remarks').value,
@@ -246,10 +244,8 @@ function getFormData() {
 function loadFormData(data) {
   document.getElementById('poDateDisplay').textContent = data.poDate || '';
   document.getElementById('poNumDisplay').textContent = data.poNumber || '';
-  document.getElementById('supplierName').value = data.supplierName || '';
   setAddressLines('supplier', data.supplierAddressLines || data.supplierAddress || '');
   document.getElementById('supplierGstin').value = data.supplierGstin || '';
-  document.getElementById('shippingName').value = data.shippingName || '';
   setAddressLines('shipping', data.shippingAddressLines || data.shippingAddress || '');
   document.getElementById('remarks').value = data.remarks || '';
 
@@ -264,7 +260,8 @@ function loadFormData(data) {
 
 function savePO() {
   const data = getFormData();
-  if (!data.supplierName && !data.items.some(i => i.desc)) {
+  const hasSupplierAddr = (data.supplierAddressLines || []).some(l => l && l.trim());
+  if (!hasSupplierAddr && !data.items.some(i => i.desc)) {
     showToast('Please fill in some details before saving');
     return;
   }
@@ -322,10 +319,8 @@ function clearAllPOs() {
 }
 
 function newPO() {
-  document.getElementById('supplierName').value = '';
   setAddressLines('supplier', '');
   document.getElementById('supplierGstin').value = '';
-  document.getElementById('shippingName').value = '';
   setAddressLines('shipping', '');
   document.getElementById('remarks').value = '';
   document.getElementById('itemsBody').innerHTML = '';
