@@ -294,7 +294,7 @@ body {
 
 .po-table td {
   padding: 5px 8px;
-  border: 1px solid #ddd;
+  border: 1px solid #333;
   font-size: 13px;
   height: 32px;
 }
@@ -365,7 +365,7 @@ body {
 
 .empty-row td {
   height: 32px;
-  border: 1px solid #ddd;
+  border: 1px solid #333;
 }
 
 .btn-remove {
@@ -408,7 +408,7 @@ body {
 .totals-table td {
   padding: 8px 10px;
   font-size: 13px;
-  border: 1px solid #ddd;
+  border: 1px solid #333;
 }
 .totals-left-cell { text-align: left; }
 .totals-right-cell {
