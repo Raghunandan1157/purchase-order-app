@@ -472,53 +472,20 @@ function addResetButton(el, onReset) {
   });
 })();
 
-// === PDF export (forced single A4 page) ===
-async function savePDF() {
-  if (typeof html2canvas === 'undefined' || !window.jspdf) {
-    showToast('PDF library still loading, try again');
-    return;
-  }
+// === PDF export — uses browser native print-to-PDF ===
+function savePDF() {
+  const poNum = (document.getElementById('poNumDisplay').textContent || 'PO').trim();
+  const originalTitle = document.title;
+  document.title = poNum;
   prepareForPrint();
-  const el = document.getElementById('purchaseOrder');
-  const filename = (document.getElementById('poNumDisplay').textContent || 'PO').trim() + '.pdf';
-
-  try {
-    const canvas = await html2canvas(el, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-      onclone: (doc) => { doc.body.classList.add('pdf-export'); }
-    });
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 8;
-    const maxW = pageW - margin * 2;
-    const maxH = pageH - margin * 2;
-
-    // Scale to fit whichever dimension constrains — ensures single page
-    const canvasRatio = canvas.width / canvas.height;
-    const boxRatio = maxW / maxH;
-    let imgW, imgH;
-    if (canvasRatio > boxRatio) {
-      imgW = maxW;
-      imgH = maxW / canvasRatio;
-    } else {
-      imgH = maxH;
-      imgW = maxH * canvasRatio;
-    }
-    const x = (pageW - imgW) / 2;
-    const y = margin;
-    pdf.addImage(canvas.toDataURL('image/jpeg', 0.98), 'JPEG', x, y, imgW, imgH);
-    pdf.save(filename);
-  } catch (err) {
-    console.error(err);
-    showToast('PDF export failed');
-  } finally {
+  showToast('In the print dialog, choose "Save as PDF"');
+  const cleanup = () => {
     cleanupAfterPrint();
-  }
+    document.title = originalTitle;
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(() => window.print(), 50);
 }
 document.getElementById('btnPdf').addEventListener('click', savePDF);
 
