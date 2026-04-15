@@ -195,6 +195,22 @@ function cleanupAfterPrint() {
   document.querySelectorAll('#itemsBody .empty-row').forEach(r => r.remove());
 }
 
+// === Address helpers (5 stacked lines per address) ===
+function getAddressLines(which) {
+  return Array.from(document.querySelectorAll(`.addr-line[data-addr="${which}"]`))
+    .sort((a, b) => (+a.dataset.idx) - (+b.dataset.idx))
+    .map(i => i.value);
+}
+
+function setAddressLines(which, value) {
+  const inputs = Array.from(document.querySelectorAll(`.addr-line[data-addr="${which}"]`))
+    .sort((a, b) => (+a.dataset.idx) - (+b.dataset.idx));
+  let lines = [];
+  if (Array.isArray(value)) lines = value;
+  else if (typeof value === 'string') lines = value.split('\n');
+  inputs.forEach((inp, i) => { inp.value = lines[i] || ''; });
+}
+
 // === Local Storage ===
 function getFormData() {
   const items = [];
@@ -208,14 +224,19 @@ function getFormData() {
     });
   });
 
+  const supplierAddressLines = getAddressLines('supplier');
+  const shippingAddressLines = getAddressLines('shipping');
+
   return {
     poDate: document.getElementById('poDateDisplay').textContent,
     poNumber: document.getElementById('poNumDisplay').textContent,
     supplierName: document.getElementById('supplierName').value,
-    supplierAddress: document.getElementById('supplierAddress').value,
+    supplierAddressLines,
+    supplierAddress: supplierAddressLines.join('\n'),
     supplierGstin: document.getElementById('supplierGstin').value,
     shippingName: document.getElementById('shippingName').value,
-    shippingAddress: document.getElementById('shippingAddress').value,
+    shippingAddressLines,
+    shippingAddress: shippingAddressLines.join('\n'),
     remarks: document.getElementById('remarks').value,
     items,
     savedAt: new Date().toISOString(),
@@ -226,10 +247,10 @@ function loadFormData(data) {
   document.getElementById('poDateDisplay').textContent = data.poDate || '';
   document.getElementById('poNumDisplay').textContent = data.poNumber || '';
   document.getElementById('supplierName').value = data.supplierName || '';
-  document.getElementById('supplierAddress').value = data.supplierAddress || '';
+  setAddressLines('supplier', data.supplierAddressLines || data.supplierAddress || '');
   document.getElementById('supplierGstin').value = data.supplierGstin || '';
   document.getElementById('shippingName').value = data.shippingName || '';
-  document.getElementById('shippingAddress').value = data.shippingAddress || '';
+  setAddressLines('shipping', data.shippingAddressLines || data.shippingAddress || '');
   document.getElementById('remarks').value = data.remarks || '';
 
   document.getElementById('itemsBody').innerHTML = '';
@@ -302,10 +323,10 @@ function clearAllPOs() {
 
 function newPO() {
   document.getElementById('supplierName').value = '';
-  document.getElementById('supplierAddress').value = '';
+  setAddressLines('supplier', '');
   document.getElementById('supplierGstin').value = '';
   document.getElementById('shippingName').value = '';
-  document.getElementById('shippingAddress').value = '';
+  setAddressLines('shipping', '');
   document.getElementById('remarks').value = '';
   document.getElementById('itemsBody').innerHTML = '';
   setAutoFields();
@@ -471,6 +492,20 @@ document.addEventListener('keydown', (e) => {
     savePO();
   }
 });
+
+// === GSTIN: force uppercase, strip spaces ===
+(function initGstin() {
+  const el = document.getElementById('supplierGstin');
+  if (!el) return;
+  el.addEventListener('input', () => {
+    const pos = el.selectionStart;
+    const cleaned = el.value.toUpperCase().replace(/\s+/g, '');
+    if (cleaned !== el.value) {
+      el.value = cleaned;
+      try { el.setSelectionRange(pos, pos); } catch (_) {}
+    }
+  });
+})();
 
 // === Init ===
 setAutoFields();
