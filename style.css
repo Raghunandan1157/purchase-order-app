@@ -261,6 +261,16 @@ body {
   line-height: 1.5;
 }
 
+.gstin-row-outside {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 30px 14px;
+  padding: 4px 0;
+}
+.gstin-row-outside .gstin-input {
+  max-width: 280px;
+}
 .gstin-row {
   display: flex;
   align-items: center;
