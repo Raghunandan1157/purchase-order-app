@@ -6,140 +6,320 @@
   <title>Purchase Order - Navachetana Livelihoods</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <!-- Toolbar -->
-    <div class="toolbar no-print">
-      <button id="btnNew">+ New</button>
-      <button id="btnSave">Save</button>
-      <button id="btnPrint">Print</button>
-      <button id="btnPdf">PDF</button>
-      <button id="btnLoad">Load Saved</button>
-      <button id="btnClear">Clear All</button>
+
+  <!-- ======================= LOGIN OVERLAY ======================= -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-bar"></div>
+        <h1>Navachetana</h1>
+        <p class="login-sub">Purchase Order System</p>
+      </div>
+      <form id="loginForm" class="login-form" autocomplete="off">
+        <label for="loginName">Your Name</label>
+        <input type="text" id="loginName" placeholder="Enter your name" autocomplete="off" required />
+        <div id="loginPwWrap" class="login-pw-wrap hidden">
+          <label for="loginPw">Admin Password</label>
+          <input type="password" id="loginPw" placeholder="Enter admin password" autocomplete="off" />
+        </div>
+        <button type="submit" id="loginBtn" class="login-btn">Continue</button>
+        <p id="loginError" class="login-error"></p>
+        <p class="login-hint">Same name on any device restores your history.</p>
+      </form>
     </div>
+  </div>
 
-    <!-- Purchase Order Document -->
-    <div class="po-page" id="purchaseOrder">
+  <!-- ======================= APP SHELL ======================= -->
+  <div id="appShell" class="app-shell hidden">
 
-      <!-- Top red bar -->
-      <div class="red-bar-top">
-        <h1>Purchase Order</h1>
+    <!-- Sidebar -->
+    <aside class="sidebar no-print" id="sidebar">
+      <div class="sidebar-header">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <div class="user-info">
+          <div class="user-name" id="userNameDisplay">—</div>
+          <div class="user-meta" id="userMetaDisplay">logged in</div>
+        </div>
+        <button class="icon-btn" id="btnLogout" title="Logout">⎋</button>
       </div>
 
-      <!-- Company Info + Date -->
-      <div class="header-row">
-        <div class="company-block">
-          <p class="co-name">Navachetana Livelihoods Private Limited</p>
-          <p>Navachetana Heights, Ashwini Nagar 1st Cross</p>
-          <p>Haveri-581110. KARNATAKA</p>
-          <p>GSTIN:29AAICN8493K1ZJ</p>
-          <p>CIN:U65922KA1995PTCO17982</p>
-        </div>
-        <div class="date-block">
-          <div class="date-line"><span class="dl">Date:</span> <span id="poDateDisplay" class="editable" data-key="poDate" data-picker="date" data-session-only="1" title="Click to choose date"></span><input type="date" id="poDatePicker" class="hidden-picker" /></div>
-          <div class="date-line"><span class="dl">PO No:</span> <span id="poNumDisplay" class="editable" data-key="poNum" data-session-only="1" title="Click to edit"></span></div>
-          <div class="date-line contact-line">Mob: <span class="editable" data-key="companyMob" data-default="8105801229" title="Click to edit">8105801229</span></div>
-          <div class="date-line contact-line"><span class="editable" data-key="companyEmail" data-default="admin-ast2@navachetanagroup.com" title="Click to edit">admin-ast2@navachetanagroup.com</span></div>
-        </div>
-      </div>
-
-      <!-- Supplier + Shipping (editable inline) -->
-      <div class="supplier-block">
-        <div class="supplier-col">
-          <p class="supplier-label">SUPPLIER:</p>
-          <div class="address-lines">
-            <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="1" placeholder="Name" />
-            <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="2" placeholder="Address Line 1" />
-            <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="3" placeholder="Address Line 2" />
-            <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="4" placeholder="Address Line 3" />
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">This Month</div>
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-num" id="statMonthCount">0</div>
+            <div class="stat-label">POs</div>
           </div>
-        </div>
-        <div class="supplier-col">
-          <p class="supplier-label">SHIPPING ADDRESS:</p>
-          <div class="address-lines">
-            <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="1" placeholder="Name" />
-            <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="2" placeholder="Address Line 1" />
-            <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="3" placeholder="Address Line 2" />
-            <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="4" placeholder="Address Line 3" />
+          <div class="stat-card">
+            <div class="stat-num" id="statMonthTotal">0</div>
+            <div class="stat-label">Value (₹)</div>
           </div>
         </div>
       </div>
 
-      <div class="gstin-row-outside">
-        <label class="gstin-label" for="supplierGstin">SUPPLIER GSTIN:</label>
-        <input type="text" id="supplierGstin" class="inline-input gstin-input" placeholder="Enter GSTIN" autocomplete="off" spellcheck="false" maxlength="15" />
-      </div>
-
-      <!-- Items Table with per-item GST -->
-      <table class="po-table" id="poTable">
-        <thead>
-          <tr>
-            <th class="col-desc">Description</th>
-            <th class="col-qty">QTY</th>
-            <th class="col-price">UNIT PRICE</th>
-            <th class="col-gst">GST %</th>
-            <th class="col-gst-amt">GST AMT</th>
-            <th class="col-total">TOTAL</th>
-            <th class="col-action no-print"></th>
-          </tr>
-        </thead>
-        <tbody id="itemsBody"></tbody>
-      </table>
-
-      <button id="btnAddRow" class="btn-add-row no-print">+ Add Item</button>
-
-      <!-- Totals -->
-      <table class="totals-table">
-        <tbody>
-          <tr>
-            <td class="totals-left-cell">Subtotal (before GST)</td>
-            <td class="totals-right-cell" id="subtotal">0.00</td>
-          </tr>
-          <tr>
-            <td class="totals-left-cell">Total GST</td>
-            <td class="totals-right-cell" id="totalGst">0.00</td>
-          </tr>
-          <tr class="grand-row">
-            <td class="totals-left-cell grand-label">Grand TOTAL</td>
-            <td class="totals-right-cell grand-value" id="grandTotal">0.00</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Amount in Words -->
-      <div class="words-block">
-        <span class="words-label">Amount in Words:</span>
-        <span class="words-value" id="amountWords"></span>
-        <div class="words-underline"></div>
-      </div>
-
-      <!-- Footer -->
-      <div class="footer-block">
-        <div class="remarks-side">
-          <p class="remarks-label">Remarks / Payment Instructions:</p>
-          <textarea id="remarks" rows="2" class="inline-textarea remarks-area" placeholder="Enter remarks..."></textarea>
-        </div>
-        <div class="sign-side">
-          <p>For Navachetana Livelihoods Private Limited</p>
-          <div class="sig-space"></div>
-          <p class="sig-title">Authorised Signatory</p>
+      <div class="sidebar-section chart-section">
+        <div class="sidebar-section-title">Monthly View</div>
+        <div class="chart-wrap">
+          <canvas id="monthChart"></canvas>
         </div>
       </div>
 
-      <!-- Bottom red bar -->
-      <div class="red-bar-bottom"></div>
+      <div class="sidebar-section history-section">
+        <div class="sidebar-section-title">
+          <span>History</span>
+          <input type="text" id="historySearch" class="history-search" placeholder="Search..." />
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-area">
+
+      <!-- ============ DOC GRID VIEW ============ -->
+      <section class="docs-view no-print" id="docsView">
+        <div class="docs-header">
+          <div>
+            <h2 class="docs-title">Purchase Orders</h2>
+            <p class="docs-sub" id="docsSub">Start a new one or open a recent order</p>
+          </div>
+          <input type="text" id="docsSearch" class="docs-search" placeholder="Search orders..." />
+        </div>
+        <div class="docs-grid" id="docsGrid"></div>
+      </section>
+
+      <!-- ============ EDITOR VIEW ============ -->
+      <div class="container editor-view hidden" id="editorView">
+        <!-- Toolbar -->
+        <div class="toolbar no-print">
+          <button id="btnBack" class="tb-btn tb-ghost" title="Back to orders">← Back</button>
+          <button id="btnNew" class="tb-btn tb-ghost">＋ New</button>
+          <button id="btnPrint" class="tb-btn tb-ghost">Print</button>
+          <button id="btnPdf" class="tb-btn tb-ghost">PDF</button>
+          <div class="save-status" id="saveStatus" title="Auto-save">
+            <span class="save-dot"></span>
+            <span class="save-text" id="saveStatusText">Saved</span>
+          </div>
+          <button id="btnSidebarToggle" class="tb-btn tb-ghost sidebar-toggle" title="Toggle sidebar">☰</button>
+        </div>
+
+        <!-- Purchase Order Document -->
+        <div class="po-page" id="purchaseOrder">
+
+          <div class="red-bar-top">
+            <h1>Purchase Order</h1>
+          </div>
+
+          <div class="header-row">
+            <div class="company-block">
+              <p class="co-name">Navachetana Livelihoods Private Limited</p>
+              <p>Navachetana Heights, Ashwini Nagar 1st Cross</p>
+              <p>Haveri-581110. KARNATAKA</p>
+              <p>GSTIN:29AAICN8493K1ZJ</p>
+              <p>CIN:U65922KA1995PTCO17982</p>
+            </div>
+            <div class="date-block">
+              <div class="date-line"><span class="dl">Date:</span> <span id="poDateDisplay" class="editable" data-key="poDate" data-picker="date" data-session-only="1" title="Click to choose date"></span><input type="date" id="poDatePicker" class="hidden-picker" /></div>
+              <div class="date-line"><span class="dl">PO No:</span> <span id="poNumDisplay" class="editable" data-key="poNum" data-session-only="1" title="Click to edit"></span></div>
+              <div class="date-line contact-line">Mob: <span class="editable" data-key="companyMob" data-default="8105801229" title="Click to edit">8105801229</span></div>
+              <div class="date-line contact-line"><span class="editable" data-key="companyEmail" data-default="admin-ast2@navachetanagroup.com" title="Click to edit">admin-ast2@navachetanagroup.com</span></div>
+            </div>
+          </div>
+
+          <div class="supplier-block">
+            <div class="supplier-col">
+              <p class="supplier-label">SUPPLIER:</p>
+              <div class="address-lines">
+                <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="1" placeholder="Name" />
+                <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="2" placeholder="Address Line 1" />
+                <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="3" placeholder="Address Line 2" />
+                <input type="text" class="inline-input addr-line" data-addr="supplier" data-idx="4" placeholder="Address Line 3" />
+              </div>
+            </div>
+            <div class="supplier-col">
+              <p class="supplier-label">SHIPPING ADDRESS:</p>
+              <div class="address-lines">
+                <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="1" placeholder="Name" />
+                <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="2" placeholder="Address Line 1" />
+                <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="3" placeholder="Address Line 2" />
+                <input type="text" class="inline-input addr-line" data-addr="shipping" data-idx="4" placeholder="Address Line 3" />
+              </div>
+            </div>
+          </div>
+
+          <div class="gstin-row-outside">
+            <label class="gstin-label" for="supplierGstin">SUPPLIER GSTIN:</label>
+            <input type="text" id="supplierGstin" class="inline-input gstin-input" placeholder="Enter GSTIN" autocomplete="off" spellcheck="false" maxlength="15" />
+          </div>
+
+          <table class="po-table" id="poTable">
+            <thead>
+              <tr>
+                <th class="col-desc">Description</th>
+                <th class="col-qty">QTY</th>
+                <th class="col-price">UNIT PRICE</th>
+                <th class="col-gst">GST %</th>
+                <th class="col-gst-amt">GST AMT</th>
+                <th class="col-total">TOTAL</th>
+                <th class="col-action no-print"></th>
+              </tr>
+            </thead>
+            <tbody id="itemsBody"></tbody>
+          </table>
+
+          <button id="btnAddRow" class="btn-add-row no-print">+ Add Item</button>
+
+          <table class="totals-table">
+            <tbody>
+              <tr>
+                <td class="totals-left-cell">Subtotal (before GST)</td>
+                <td class="totals-right-cell" id="subtotal">0.00</td>
+              </tr>
+              <tr>
+                <td class="totals-left-cell">Total GST</td>
+                <td class="totals-right-cell" id="totalGst">0.00</td>
+              </tr>
+              <tr class="grand-row">
+                <td class="totals-left-cell grand-label">Grand TOTAL</td>
+                <td class="totals-right-cell grand-value" id="grandTotal">0.00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="words-block">
+            <span class="words-label">Amount in Words:</span>
+            <span class="words-value" id="amountWords"></span>
+            <div class="words-underline"></div>
+          </div>
+
+          <div class="footer-block">
+            <div class="remarks-side">
+              <p class="remarks-label">Remarks / Payment Instructions:</p>
+              <textarea id="remarks" rows="2" class="inline-textarea remarks-area" placeholder="Enter remarks..."></textarea>
+            </div>
+            <div class="sign-side">
+              <p>For Navachetana Livelihoods Private Limited</p>
+              <div class="sig-space"></div>
+              <p class="sig-title">Authorised Signatory</p>
+            </div>
+          </div>
+
+          <div class="red-bar-bottom"></div>
+        </div>
+
+        <!-- Saved POs Modal -->
+        <div id="savedModal" class="modal hidden">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h2>Saved Purchase Orders</h2>
+              <button id="btnCloseModal" class="btn-close">&times;</button>
+            </div>
+            <div id="savedList" class="saved-list"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ======================= ADMIN DASHBOARD ======================= -->
+  <div id="adminPanel" class="admin-panel hidden">
+    <header class="admin-topbar">
+      <div class="admin-brand">
+        <span class="admin-dot"></span>
+        <span>Admin Dashboard</span>
+      </div>
+      <div class="admin-actions">
+        <button id="btnAdminSettings" class="admin-btn-ghost">⚙ Settings</button>
+        <button id="btnAdminLogout" class="admin-btn-ghost">⎋ Logout</button>
+      </div>
+    </header>
+
+    <div class="admin-body">
+      <section class="admin-kpis">
+        <div class="kpi-card">
+          <div class="kpi-label">Total Users</div>
+          <div class="kpi-num" id="adminKpiUsers">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total POs</div>
+          <div class="kpi-num" id="adminKpiPos">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">This Month</div>
+          <div class="kpi-num" id="adminKpiMonth">0</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Value (₹)</div>
+          <div class="kpi-num" id="adminKpiValue">0</div>
+        </div>
+      </section>
+
+      <section class="admin-chart-row">
+        <div class="admin-chart-card">
+          <div class="admin-card-title">Monthly Purchase Orders</div>
+          <div class="admin-chart-wrap">
+            <canvas id="adminChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-lists">
+        <div class="admin-list-card">
+          <div class="admin-card-title">
+            <span>Users</span>
+            <input type="text" id="adminUserSearch" class="admin-search" placeholder="Search users..." />
+          </div>
+          <div id="adminUsersList" class="admin-table-wrap"></div>
+        </div>
+        <div class="admin-list-card">
+          <div class="admin-card-title">
+            <span>All Purchase Orders</span>
+            <input type="text" id="adminPoSearch" class="admin-search" placeholder="Search PO / user..." />
+          </div>
+          <div id="adminPosList" class="admin-table-wrap"></div>
+        </div>
+      </section>
     </div>
+  </div>
 
-    <!-- Saved POs Modal -->
-    <div id="savedModal" class="modal hidden">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Saved Purchase Orders</h2>
-          <button id="btnCloseModal" class="btn-close">&times;</button>
-        </div>
-        <div id="savedList" class="saved-list"></div>
+  <!-- Admin Settings Modal -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h2>Admin Settings</h2>
+        <button id="btnCloseSettings" class="btn-close">&times;</button>
       </div>
+      <div class="settings-body">
+        <div class="settings-field">
+          <label for="settingsCurrentPw">Current Password</label>
+          <input type="password" id="settingsCurrentPw" placeholder="Current password" />
+        </div>
+        <div class="settings-field">
+          <label for="settingsNewPw">New Password</label>
+          <input type="password" id="settingsNewPw" placeholder="New password" />
+        </div>
+        <div class="settings-field">
+          <label for="settingsConfirmPw">Confirm New Password</label>
+          <input type="password" id="settingsConfirmPw" placeholder="Confirm new password" />
+        </div>
+        <p id="settingsError" class="settings-error"></p>
+        <button id="btnSaveSettings" class="settings-save-btn">Update Password</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PO Detail Modal (admin) -->
+  <div id="poDetailModal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="poDetailTitle">PO Details</h2>
+        <button id="btnClosePoDetail" class="btn-close">&times;</button>
+      </div>
+      <div class="po-detail-body" id="poDetailBody"></div>
     </div>
   </div>
 
