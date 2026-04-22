@@ -1537,7 +1537,11 @@ body {
 .pdf-export .red-bar-top h1 { color: #fff !important; }
 .pdf-export .red-bar-bottom { background: var(--brand) !important; }
 .pdf-export .dl,
-.pdf-export .date-line span:not(.dl) { color: var(--ink) !important; }
+.pdf-export .date-line span:not(.dl) { color: #000 !important; }
+.pdf-export .date-line { color: #000 !important; font-weight: 700 !important; }
+.pdf-export .date-line.contact-line,
+.pdf-export .date-line.contact-line span:not(.dl) { color: #000 !important; font-weight: 700 !important; }
+.pdf-export .dl { font-weight: 800 !important; }
 .pdf-export .po-table thead tr,
 .pdf-export .po-table th { background: var(--brand) !important; color: #fff !important; }
 
@@ -1560,8 +1564,11 @@ body {
   .red-bar-top h1 { color: #fff !important; }
   .red-bar-bottom { background: var(--brand) !important; }
 
-  .dl { color: var(--ink) !important; }
-  .date-line span:not(.dl) { color: var(--ink) !important; }
+  .date-line { color: #000 !important; font-weight: 700 !important; }
+  .dl { color: #000 !important; font-weight: 800 !important; }
+  .date-line span:not(.dl) { color: #000 !important; font-weight: 700 !important; }
+  .date-line.contact-line,
+  .date-line.contact-line span:not(.dl) { color: #000 !important; font-weight: 700 !important; }
 
   .po-table thead tr { background: var(--brand) !important; }
   .po-table th { color: #fff !important; background: var(--brand) !important; }
