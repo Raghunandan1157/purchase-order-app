@@ -1618,6 +1618,37 @@ body {
     font-size: 13px !important;
   }
 
+  /* Remove number-input up/down spinner arrows on the printout
+     (keeps the typed value, e.g. 0.00, untouched). */
+  .po-table input[type="number"]::-webkit-inner-spin-button,
+  .po-table input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    margin: 0 !important;
+  }
+  .po-table input[type="number"] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+  }
+
+  /* Make the whole printed page solid black + bold so nothing reads as
+     dull grey on a black-and-white printer. */
+  .po-page,
+  .po-page * {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+    font-weight: 700 !important;
+  }
+  /* Keep the header band + accent bars legible (white text on dark fill). */
+  .po-table thead tr th {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+  .red-bar-top h1 {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff !important;
+  }
+
   @page {
     margin: 10mm;
     size: A4;
