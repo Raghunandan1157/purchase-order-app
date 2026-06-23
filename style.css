@@ -1589,6 +1589,35 @@ body {
     appearance: none !important;
   }
 
+  /* Supplier / Shipping / GSTIN — force solid black + bold so they stay
+     fully visible on a black-and-white printer (default grey is too faint). */
+  .supplier-label,
+  .gstin-label {
+    color: #000 !important;
+    font-weight: 800 !important;
+  }
+  .supplier-col .address-lines .addr-line,
+  .gstin-input,
+  #supplierGstin {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+    font-weight: 700 !important;
+  }
+  /* Breathing room inside the supplier / shipping cells so text doesn't
+     hug the box borders (overrides the generic print padding reset above).
+     Slightly smaller font keeps the longest address line from clipping the
+     right border, since single-line inputs can't wrap. */
+  .supplier-col > .supplier-label,
+  .supplier-col .address-lines .addr-line {
+    padding: 6px 12px !important;
+  }
+  .supplier-col .address-lines .addr-line {
+    font-size: 12px !important;
+  }
+  .supplier-col .address-lines .addr-line[data-idx="1"] {
+    font-size: 13px !important;
+  }
+
   @page {
     margin: 10mm;
     size: A4;
