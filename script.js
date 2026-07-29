@@ -22,6 +22,7 @@ const LS_USER = 'po_current_user';        // { name, display_name }
 const LS_ADMIN_SESSION = 'po_admin_session'; // "1" while admin
 let currentUser = null;
 let currentPoId = null;          // DB id of currently loaded PO (null = new)
+let poNumManual = false;         // true once the user hand-edits the PO number
 let userOrdersCache = [];        // all orders for current user
 let allOrdersCache = [];         // admin: all orders
 let allUsersCache = [];          // admin: all users
@@ -348,6 +349,9 @@ function getFormData() {
 
 function loadFormData(data) {
   suppressAutosave = true;
+  // An existing PO keeps its stored number; it is never re-generated because
+  // currentPoId is set, so the manual flag starts clean.
+  poNumManual = false;
   document.getElementById('poDateDisplay').textContent = data.poDate || '';
   document.getElementById('poNumDisplay').textContent = data.poNumber || '';
   setAddressLines('supplier', data.supplierAddressLines || data.supplierAddress || '');
@@ -381,9 +385,21 @@ function rowToForm(row) {
 // ============================================================
 // Supabase: PO number generation (globally sequential)
 // ============================================================
+// Numeric tail of a PO number. Zero-padding has been inconsistent over time
+// ("PO-2026-004" and "PO-2026-0007" both exist), so sequences must be compared
+// as numbers — string ordering puts "015" above "0008".
+function poSeq(poNumber) {
+  const m = /PO-\d{4}-(\d+)/.exec(poNumber || '');
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+function formatPoNumber(seq, year) {
+  return `PO-${year}-${String(seq).padStart(4, '0')}`;
+}
+
 async function nextPoNumber() {
   const year = new Date().getFullYear();
-  if (!supa) return `PO-${year}-0001`;
+  if (!supa) return formatPoNumber(1, year);
   // Prefer atomic server-side RPC (single sequence bump = negligible compute,
   // collision-proof across concurrent users). Falls back to max+1 query if
   // the function isn't deployed yet.
@@ -392,21 +408,22 @@ async function nextPoNumber() {
     if (!error && data) return data;
   } catch (_) {}
   try {
-    const { data, error } = await supa
-      .from(T_ORDERS)
-      .select('po_number')
-      .order('id', { ascending: false })
-      .limit(1);
+    // Scan every PO number and take the highest sequence. Ordering by `id` was
+    // wrong: id 11 holds PO-2026-0007 while id 10 holds PO-2026-0008, so
+    // max-by-id kept proposing 0008 — a number that already existed, which then
+    // failed the unique constraint on every save.
+    const { data, error } = await supa.from(T_ORDERS).select('po_number');
     if (error) throw error;
-    let next = 1;
-    if (data && data.length > 0) {
-      const m = /PO-\d{4}-(\d+)/.exec(data[0].po_number || '');
-      if (m) next = parseInt(m[1], 10) + 1;
-    }
-    return `PO-${year}-${String(next).padStart(4, '0')}`;
+    const rows = data || [];
+    const used = new Set(rows.map(r => (r.po_number || '').trim()));
+    let next = rows.reduce((max, r) => Math.max(max, poSeq(r.po_number)), 0) + 1;
+    // Padding differences mean a distinct string can still be a taken slot;
+    // step past anything already on the books.
+    while (used.has(formatPoNumber(next, year))) next += 1;
+    return formatPoNumber(next, year);
   } catch (e) {
     console.error('nextPoNumber', e);
-    return `PO-${year}-${String(Date.now() % 10000).padStart(4, '0')}`;
+    return formatPoNumber(Date.now() % 10000, year);
   }
 }
 
@@ -431,8 +448,10 @@ async function savePO(opts) {
 
   setSaveStatus('saving');
 
-  let poNum = data.poNumber;
-  if (!currentPoId) {
+  // A hand-typed number wins — it's the manual escape hatch when auto-numbering
+  // goes wrong. Only generate one when the user hasn't set it themselves.
+  let poNum = (data.poNumber || '').trim();
+  if (!currentPoId && (!poNumManual || !poNum)) {
     poNum = await nextPoNumber();
     data.poNumber = poNum;
     document.getElementById('poNumDisplay').textContent = poNum;
@@ -474,9 +493,24 @@ async function savePO(opts) {
   } catch (e) {
     console.error('savePO', e);
     if (String(e.message || '').includes('duplicate') || e.code === '23505') {
-      // Concurrent PO-number collision: client drops its guess and retries once.
-      currentPoId = null;
-      return savePO(opts);
+      // A hand-typed number that collides is the user's to resolve — silently
+      // renumbering would throw away what they deliberately entered.
+      if (poNumManual) {
+        setSaveStatus('error', 'PO number in use');
+        if (!auto) showToast(`PO number ${poNum} already exists — pick another`, 'error');
+        return;
+      }
+      // Concurrent collision: drop the guess and retry with a fresh number.
+      // Bounded, because an unbounded retry here spins forever whenever the
+      // generator keeps proposing the same taken number.
+      const tries = (opts && opts._retry) || 0;
+      if (tries < 3) {
+        currentPoId = null;
+        return savePO(Object.assign({}, opts, { _retry: tries + 1 }));
+      }
+      setSaveStatus('error', 'PO number conflict');
+      if (!auto) showToast('Could not allocate a free PO number — set one manually', 'error');
+      return;
     }
     setSaveStatus('error', 'Save failed');
     if (!auto) showToast('Save failed: ' + (e.message || 'Unknown error'), 'error');
@@ -626,6 +660,7 @@ async function newPO() {
   await flushAutosave();
   suppressAutosave = true;
   currentPoId = null;
+  poNumManual = false;             // fresh PO returns to auto-numbering
   setAddressLines('supplier', '');
   document.getElementById('supplierGstin').value = '';
   setAddressLines('shipping', '');
@@ -1304,6 +1339,12 @@ function addResetButton(el, onReset) {
       const val = el.textContent.trim() || def || previous;
       el.textContent = val;
       el.contentEditable = 'false';
+      // Remember that the PO number was set by hand so auto-numbering leaves it
+      // alone from here on.
+      if (key === 'poNum' && val !== previous) {
+        poNumManual = true;
+        scheduleAutosave();
+      }
       if (key && !sessionOnly) localStorage.setItem(key, val);
     }
     el.addEventListener('blur', commit);
